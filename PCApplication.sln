@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCApplication", "PCApplication\PCApplication.csproj", "{66D7E9BA-22E0-4D88-9750-5A4F6C0D7E34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCConsole", "PCConsole\PCConsole.csproj", "{CAF98102-9946-47AE-A130-7C8329D8B498}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPSenderService", "IPSenderService\IPSenderService.csproj", "{801A13DB-FEAF-458B-9D99-B89D5F3D06E5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66D7E9BA-22E0-4D88-9750-5A4F6C0D7E34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66D7E9BA-22E0-4D88-9750-5A4F6C0D7E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66D7E9BA-22E0-4D88-9750-5A4F6C0D7E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66D7E9BA-22E0-4D88-9750-5A4F6C0D7E34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF98102-9946-47AE-A130-7C8329D8B498}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF98102-9946-47AE-A130-7C8329D8B498}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF98102-9946-47AE-A130-7C8329D8B498}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF98102-9946-47AE-A130-7C8329D8B498}.Release|Any CPU.Build.0 = Release|Any CPU
+		{801A13DB-FEAF-458B-9D99-B89D5F3D06E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{801A13DB-FEAF-458B-9D99-B89D5F3D06E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{801A13DB-FEAF-458B-9D99-B89D5F3D06E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{801A13DB-FEAF-458B-9D99-B89D5F3D06E5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
