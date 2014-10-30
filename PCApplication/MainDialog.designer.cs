@@ -156,7 +156,7 @@
             this.DataTabContainer.Location = new System.Drawing.Point(4, 22);
             this.DataTabContainer.Name = "DataTabContainer";
             this.DataTabContainer.Padding = new System.Windows.Forms.Padding(3);
-            this.DataTabContainer.Size = new System.Drawing.Size(396, 383);
+            this.DataTabContainer.Size = new System.Drawing.Size(375, 383);
             this.DataTabContainer.TabIndex = 1;
             this.DataTabContainer.Text = "Data";
             this.DataTabContainer.UseVisualStyleBackColor = true;
@@ -166,7 +166,7 @@
             this.SecurityTabContainer.Location = new System.Drawing.Point(4, 22);
             this.SecurityTabContainer.Name = "SecurityTabContainer";
             this.SecurityTabContainer.Padding = new System.Windows.Forms.Padding(3);
-            this.SecurityTabContainer.Size = new System.Drawing.Size(396, 383);
+            this.SecurityTabContainer.Size = new System.Drawing.Size(375, 383);
             this.SecurityTabContainer.TabIndex = 2;
             this.SecurityTabContainer.Text = "Security";
             this.SecurityTabContainer.UseVisualStyleBackColor = true;
@@ -176,7 +176,7 @@
             this.LogsTabContainer.Location = new System.Drawing.Point(4, 22);
             this.LogsTabContainer.Name = "LogsTabContainer";
             this.LogsTabContainer.Padding = new System.Windows.Forms.Padding(3);
-            this.LogsTabContainer.Size = new System.Drawing.Size(396, 383);
+            this.LogsTabContainer.Size = new System.Drawing.Size(375, 383);
             this.LogsTabContainer.TabIndex = 3;
             this.LogsTabContainer.Text = "Logs";
             this.LogsTabContainer.UseVisualStyleBackColor = true;
@@ -186,7 +186,7 @@
             this.MediaTabContainer.Location = new System.Drawing.Point(4, 22);
             this.MediaTabContainer.Name = "MediaTabContainer";
             this.MediaTabContainer.Padding = new System.Windows.Forms.Padding(3);
-            this.MediaTabContainer.Size = new System.Drawing.Size(396, 383);
+            this.MediaTabContainer.Size = new System.Drawing.Size(375, 383);
             this.MediaTabContainer.TabIndex = 4;
             this.MediaTabContainer.Text = "Media";
             this.MediaTabContainer.UseVisualStyleBackColor = true;
@@ -196,7 +196,7 @@
             this.StorageTabContainer.Location = new System.Drawing.Point(4, 22);
             this.StorageTabContainer.Name = "StorageTabContainer";
             this.StorageTabContainer.Padding = new System.Windows.Forms.Padding(3);
-            this.StorageTabContainer.Size = new System.Drawing.Size(396, 383);
+            this.StorageTabContainer.Size = new System.Drawing.Size(375, 383);
             this.StorageTabContainer.TabIndex = 5;
             this.StorageTabContainer.Text = "Storage";
             this.StorageTabContainer.UseVisualStyleBackColor = true;
@@ -286,6 +286,7 @@
             this.cmdOK.TabIndex = 1;
             this.cmdOK.Text = "OK";
             this.cmdOK.UseVisualStyleBackColor = true;
+            this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
             // 
             // cmdCancel
             // 

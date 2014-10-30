@@ -24,17 +24,16 @@ namespace PCApplication
             // Put the icon in the system tray and allow it react to mouse clicks.			
             ni.MouseClick += new MouseEventHandler(ni_MouseClick);
             ni.Icon = Resources.system_tray_icon;
-            ni.Text = "System Tray Utility Application Demonstration Program";
+            ni.Text = "MyStuff status is:";
             ni.Visible = true;
 
-            // Attach a context menu.
-            //ni.ContextMenuStrip = new ContextMenus().Create();
+            // Adding context menu string to the icon
+            ni.ContextMenuStrip = new SystemTrayIconContextMenu().Create();
         }
 
         public void Dispose()
         {
             ni.Dispose();
-
         }
 
         void ni_MouseClick(object sender, MouseEventArgs e)

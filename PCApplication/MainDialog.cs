@@ -14,14 +14,15 @@ namespace PCApplication
 {
     public partial class MainDialog : Form
     {
+       
+
+        public TextBox UpdatedIP { get; set; }
         public MainDialog()
         {
             InitializeComponent();
+
+            
         }
-
-
-
-
 
         private void ForceUpdateButton_Click(object sender, EventArgs e)
         {
@@ -42,8 +43,10 @@ namespace PCApplication
 
         }
 
-
-
+        private void cmdOK_Click(object sender, EventArgs e)
+        {
+            // TODO: apply settings to hide window
+        }
 
 
 

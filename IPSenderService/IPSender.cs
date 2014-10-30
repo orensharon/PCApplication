@@ -19,11 +19,14 @@ namespace IPSenderService
 
         protected override void OnStart(string[] args)
         {
-            // TODO: Add code here to start your service.
-            IPSyncServiceReference.IPSyncClient client = new IPSyncServiceReference.IPSyncClient();
-            string ret = client.HelloWorld();
+            // By starting the IPSender windows service - creating a new instance of IPSyncClient
+            // And send it to backgrounder worker thread in type of SyncWorker
 
-            client.Close();
+            
+            SyncWorker s = new SyncWorker(1);
+
+            // Start the background thread
+            s.Start();
         }
 
         protected override void OnStop()
