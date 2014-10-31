@@ -13,6 +13,9 @@ namespace PCApplication
         // Delegate field member. using to pass the IP back from the server to the pc application
         public delegate void NewMessageDelegate(string NewMessage);
 
+        private const string PIPE_NAME = "Server-PC.IPSenderPipe";
+        private const string SERVICE_NAME = "IPSender";
+
         [STAThread]
         static void Main()
         {
@@ -30,7 +33,7 @@ namespace PCApplication
 
             // Creating event for income messages and starts listening to the pipe
             server.PipeMessage += new DelegateMessage(PipesMessageHandler);
-            server.Listen("Server-PC.IPSyncPipe");
+            server.Listen(PIPE_NAME);
 
             // Show the system tray icon.
             using (SystemTrayIcon  pi = new SystemTrayIcon())
@@ -45,7 +48,7 @@ namespace PCApplication
         private static void StartIPSyncService()
         {
             // Starting the IPSync service
-            ServiceController service = new ServiceController("IPSender");
+            ServiceController service = new ServiceController(SERVICE_NAME);
             try
             {
                 TimeSpan timeout = TimeSpan.FromMilliseconds(1000);
@@ -63,7 +66,7 @@ namespace PCApplication
         static void OnProcessExit(object sender, EventArgs e)
         {
             // Stoping the IPSync service
-            ServiceController service = new ServiceController("IPSync");
+            ServiceController service = new ServiceController(SERVICE_NAME);
             try
             {
                 TimeSpan timeout = TimeSpan.FromMilliseconds(1000);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace IPSenderService
 {
@@ -14,14 +15,16 @@ namespace IPSenderService
         private int _delta;
         private IPSyncServiceReference.IPSyncClient _client;
         private BackgroundWorker _worker;
+        EventLog _eventLog;
 
-        private const string PIPE_NAME = "Server-PC.IPSyncPipe";
+        private const string PIPE_NAME = "Server-PC.IPSenderPipe";
 
-        public SyncWorker(int delta)
+        public SyncWorker(int delta, EventLog eventlog)
         {
             // The constructor gets an int of delta - the time to wait between each messaging to server
 
             _delta = delta;
+            _eventLog = eventlog;
 
             // Creating a new instance of client
             _client = new IPSyncServiceReference.IPSyncClient();
@@ -36,6 +39,7 @@ namespace IPSenderService
 
             // Setting done event handler to the thread
             _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(DoneSyncing);
+            _worker.ProgressChanged += new ProgressChangedEventHandler(InProgress);
             _worker.WorkerSupportsCancellation = true;
 
 
@@ -65,14 +69,17 @@ namespace IPSenderService
 
                     retrivedIP = _client.HelloWorld();
                     pipclient.Send(retrivedIP, PIPE_NAME);
-                    
+
+
+                    //_eventLog.WriteEntry("Recived IP: " + retrivedIP);
 
                     // Wait delta seconds
-                    System.Threading.Thread.Sleep(_delta * 1000);
+                    System.Threading.Thread.Sleep(_delta * 500);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // For time-out error
+                    // Writing error to the event log
+                    _eventLog.WriteEntry(ex.Message);
                 }
             }
         }
@@ -88,6 +95,11 @@ namespace IPSenderService
         private void DoneSyncing(object sender, RunWorkerCompletedEventArgs e)
         {
           
+        }
+
+        private void InProgress(object sender, ProgressChangedEventArgs e)
+        {
+            
         }
     }
 }

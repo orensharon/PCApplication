@@ -29,6 +29,10 @@
             this.eventLog = new System.Diagnostics.EventLog();
             ((System.ComponentModel.ISupportInitialize)(this.eventLog)).BeginInit();
             // 
+            // eventLog
+            // 
+            this.eventLog.EntryWritten += new System.Diagnostics.EntryWrittenEventHandler(this.eventLog_EntryWritten);
+            // 
             // IPSender
             // 
             this.ServiceName = "IPSender";
@@ -38,7 +42,8 @@
 
         #endregion
 
-        private System.Diagnostics.EventLog eventLog;
+        public System.Diagnostics.EventLog eventLog;
+
 
 
     }

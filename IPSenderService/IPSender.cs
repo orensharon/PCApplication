@@ -13,8 +13,6 @@ namespace IPSenderService
 {
     partial class IPSender : ServiceBase
     {
-
-
         private SyncWorker _syncer;
 
         private const string EVENTLOG_SOURCE_NAME = "IPSenderSource";
@@ -43,7 +41,7 @@ namespace IPSenderService
             // And send it to backgrounder worker thread in type of SyncWorker
             
             string logString = "Service started";
-            _syncer = new SyncWorker(1);
+            _syncer = new SyncWorker(1,eventLog);
 
             try
             {
@@ -78,6 +76,16 @@ namespace IPSenderService
 
             // Close the eventlog
             eventLog.Close();
+        }
+
+        public void test(string message)
+        {
+            eventLog.WriteEntry(message);
+        }
+
+        private void eventLog_EntryWritten(object sender, EntryWrittenEventArgs e)
+        {
+
         }
     }
 }

@@ -9,7 +9,8 @@ namespace PCApplication
 
     class SystemTrayIconContextMenu
     {
-        
+        private const string SERVICE_NAME = "IPSender";
+
         public ContextMenuStrip Create()
         {
             // Add the default menu options.
@@ -66,7 +67,7 @@ namespace PCApplication
 
         void Exit_Click(object sender, EventArgs e)
         {
-            ServiceController service = new ServiceController("IPSync");
+            ServiceController service = new ServiceController(SERVICE_NAME);
             try
             {
                 TimeSpan timeout = TimeSpan.FromMilliseconds(1000);
