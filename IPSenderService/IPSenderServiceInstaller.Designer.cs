@@ -40,7 +40,7 @@
             // serviceInstaller
             // 
             this.serviceInstaller.Description = "This service is designed to allow the client to sync with the routing server";
-            this.serviceInstaller.DisplayName = "IPSync";
+            this.serviceInstaller.DisplayName = "IPSender";
             this.serviceInstaller.ServiceName = "IPSender";
             this.serviceInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 

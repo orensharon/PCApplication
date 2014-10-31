@@ -45,7 +45,7 @@ namespace PCApplication
         private static void StartIPSyncService()
         {
             // Starting the IPSync service
-            ServiceController service = new ServiceController("IPSync");
+            ServiceController service = new ServiceController("IPSender");
             try
             {
                 TimeSpan timeout = TimeSpan.FromMilliseconds(1000);

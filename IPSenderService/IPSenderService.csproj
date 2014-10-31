@@ -99,6 +99,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="IPSender.resx">
+      <DependentUpon>IPSender.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="IPSenderServiceInstaller.resx">
       <DependentUpon>IPSenderServiceInstaller.cs</DependentUpon>
     </EmbeddedResource>

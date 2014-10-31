@@ -15,6 +15,8 @@ namespace IPSenderService
         private IPSyncServiceReference.IPSyncClient _client;
         private BackgroundWorker _worker;
 
+        private const string PIPE_NAME = "Server-PC.IPSyncPipe";
+
         public SyncWorker(int delta)
         {
             // The constructor gets an int of delta - the time to wait between each messaging to server
@@ -46,7 +48,8 @@ namespace IPSenderService
         {
             // Syncing the server
             BackgroundWorker worker = sender as BackgroundWorker;
-                        
+            string retrivedIP = null;
+
             while (true)
             {
                 if ((worker.CancellationPending == true))
@@ -59,7 +62,9 @@ namespace IPSenderService
                 {
                     // Create a new instance of a pipe client - to communicate between windows server and application
                     PipeClient pipclient = new PipeClient();
-                    pipclient.Send(_client.HelloWorld(), "Server-PC.IPSyncPipe");
+
+                    retrivedIP = _client.HelloWorld();
+                    pipclient.Send(retrivedIP, PIPE_NAME);
                     
 
                     // Wait delta seconds
@@ -67,7 +72,6 @@ namespace IPSenderService
                 }
                 catch
                 {
-
                     // For time-out error
                 }
             }
@@ -83,8 +87,7 @@ namespace IPSenderService
 
         private void DoneSyncing(object sender, RunWorkerCompletedEventArgs e)
         {
-            // TODO
-
+          
         }
     }
 }
