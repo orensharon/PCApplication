@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStreaming", "DataStream
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPSyncing", "IPSyncing\IPSyncing.csproj", "{D66242D2-5B7F-40A1-9B09-7B76A9DD5F45}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{A26877B9-1F73-44FD-9FD8-18518B15BD62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,5 +36,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D66242D2-5B7F-40A1-9B09-7B76A9DD5F45} = {A26877B9-1F73-44FD-9FD8-18518B15BD62}
+		{15B3E0D2-6217-493A-A690-158C497F5318} = {A26877B9-1F73-44FD-9FD8-18518B15BD62}
 	EndGlobalSection
 EndGlobal
