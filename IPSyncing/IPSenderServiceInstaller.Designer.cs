@@ -1,4 +1,4 @@
-﻿namespace IPSenderService
+﻿namespace IPSyncing
 {
     partial class IPSenderServiceInstaller
     {

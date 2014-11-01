@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace IPSenderService.IPSyncServiceReference {
+namespace IPSyncing.IPSyncServiceReference {
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -23,12 +23,12 @@ namespace IPSenderService.IPSyncServiceReference {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IIPSyncChannel : IPSenderService.IPSyncServiceReference.IIPSync, System.ServiceModel.IClientChannel {
+    public interface IIPSyncChannel : IPSyncing.IPSyncServiceReference.IIPSync, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class IPSyncClient : System.ServiceModel.ClientBase<IPSenderService.IPSyncServiceReference.IIPSync>, IPSenderService.IPSyncServiceReference.IIPSync {
+    public partial class IPSyncClient : System.ServiceModel.ClientBase<IPSyncing.IPSyncServiceReference.IIPSync>, IPSyncing.IPSyncServiceReference.IIPSync {
         
         public IPSyncClient() {
         }

@@ -12,6 +12,6 @@ namespace DataStreaming
     public interface IStreamService
     {
         [OperationContract]
-        void DoWork();
+        string DoWork();
     }
 }

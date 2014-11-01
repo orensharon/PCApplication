@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace IPSenderService
+namespace IPSyncing
 {
     
     class SyncWorker

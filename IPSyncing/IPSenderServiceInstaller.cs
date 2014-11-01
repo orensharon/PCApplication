@@ -6,7 +6,7 @@ using System.Configuration.Install;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IPSenderService
+namespace IPSyncing
 {
     [RunInstaller(true)]
     public partial class IPSenderServiceInstaller : System.Configuration.Install.Installer

@@ -1,14 +1,16 @@
-﻿namespace IPSenderService
+﻿namespace IPSyncing
 {
-    partial class IPSender
+    partial class IPSenderService
     {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-        
 
-        
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -29,10 +31,6 @@
             this.eventLog = new System.Diagnostics.EventLog();
             ((System.ComponentModel.ISupportInitialize)(this.eventLog)).BeginInit();
             // 
-            // eventLog
-            // 
-            this.eventLog.EntryWritten += new System.Diagnostics.EntryWrittenEventHandler(this.eventLog_EntryWritten);
-            // 
             // IPSender
             // 
             this.ServiceName = "IPSender";
@@ -42,9 +40,6 @@
 
         #endregion
 
-        public System.Diagnostics.EventLog eventLog;
-
-
-
+        private System.Diagnostics.EventLog eventLog;
     }
 }

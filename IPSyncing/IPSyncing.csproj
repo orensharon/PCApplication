@@ -4,28 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{801A13DB-FEAF-458B-9D99-B89D5F3D06E5}</ProjectGuid>
+    <ProjectGuid>{D66242D2-5B7F-40A1-9B09-7B76A9DD5F45}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IPSenderService</RootNamespace>
-    <AssemblyName>IPSenderService</AssemblyName>
+    <RootNamespace>IPSyncing</RootNamespace>
+    <AssemblyName>IPSyncing</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -61,13 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IPSender.cs">
+    <Compile Include="PipeClient.cs" />
+    <Compile Include="IPSenderService.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="IPSender.Designer.cs">
-      <DependentUpon>IPSender.cs</DependentUpon>
+    <Compile Include="IPSenderService.Designer.cs">
+      <DependentUpon>IPSenderService.cs</DependentUpon>
     </Compile>
-    <Compile Include="PipeClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="IPSenderServiceInstaller.cs">
       <SubType>Component</SubType>
@@ -84,9 +69,7 @@
     <Compile Include="SyncWorker.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="App.config" />
     <None Include="Service References\IPSyncServiceReference\service.wsdl" />
     <None Include="Service References\IPSyncServiceReference\service.xsd">
       <SubType>Designer</SubType>
@@ -114,29 +97,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="IPSender.resx">
-      <DependentUpon>IPSender.cs</DependentUpon>
+    <EmbeddedResource Include="IPSenderService.resx">
+      <DependentUpon>IPSenderService.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="IPSenderServiceInstaller.resx">
       <DependentUpon>IPSenderServiceInstaller.cs</DependentUpon>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

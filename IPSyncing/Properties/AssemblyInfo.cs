@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("IPSenderService")]
+[assembly: AssemblyTitle("IPSyncing")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("IPSenderService")]
+[assembly: AssemblyProduct("IPSyncing")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0155181f-edd1-4f2e-b5a7-8b3f105651ad")]
+[assembly: Guid("9d1bcecb-f066-4360-9b6f-e58815f9c9cf")]
 
 // Version information for an assembly consists of the following four values:
 //

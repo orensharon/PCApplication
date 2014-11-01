@@ -8,17 +8,16 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
-
-namespace IPSenderService
+namespace IPSyncing
 {
-    partial class IPSender : ServiceBase
+    public partial class IPSenderService : ServiceBase
     {
-        private SyncWorker _syncer;
+         private SyncWorker _syncer;
 
         private const string EVENTLOG_SOURCE_NAME = "IPSenderSource";
         private const string EVENTLOG_NAME = "IPSenderLog";
 
-        public IPSender()
+        public IPSenderService()
         {
           
             InitializeComponent();
