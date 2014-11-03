@@ -28,10 +28,7 @@ namespace IPSyncing
 
             // Specify the log source
             eventLog.Source = EVENTLOG_SOURCE_NAME;
-            
 
-            // Specift the log name
-            eventLog.Log = EVENTLOG_NAME;
         }
 
         protected override void OnStart(string[] args)
@@ -40,7 +37,7 @@ namespace IPSyncing
             // And send it to backgrounder worker thread in type of SyncWorker
             
             string logString = "Service started";
-            _syncer = new SyncWorker(1,eventLog);
+            _syncer = new SyncWorker(60);
 
             try
             {
@@ -77,10 +74,6 @@ namespace IPSyncing
             eventLog.Close();
         }
 
-        public void test(string message)
-        {
-            eventLog.WriteEntry(message);
-        }
 
         private void eventLog_EntryWritten(object sender, EntryWrittenEventArgs e)
         {

@@ -6,6 +6,7 @@ using System.IO.Pipes;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.ServiceModel;
 
 namespace IPSyncing
 {
@@ -15,19 +16,30 @@ namespace IPSyncing
         private int _delta;
         private IPSyncServiceReference.IPSyncClient _client;
         private BackgroundWorker _worker;
-        EventLog _eventLog;
+        private EventLog _eventlog;
 
         private const string PIPE_NAME = "Server-PC.IPSenderPipe";
+        
+        private const string EVENTLOG_SOURCE_NAME = "IPSenderSource";
+        private const string EVENTLOG_NAME = "IPSenderLog";
 
-        public SyncWorker(int delta, EventLog eventlog)
+        public SyncWorker(int delta)
         {
             // The constructor gets an int of delta - the time to wait between each messaging to server
 
             _delta = delta;
-            _eventLog = eventlog;
+
 
             // Creating a new instance of client
             _client = new IPSyncServiceReference.IPSyncClient();
+
+            // Create new custom log if dosent exist
+            if (!EventLog.SourceExists(EVENTLOG_SOURCE_NAME))
+                EventLog.CreateEventSource(EVENTLOG_SOURCE_NAME, EVENTLOG_NAME);
+
+            // Specify the log source
+            _eventlog = new EventLog();
+            _eventlog.Source = EVENTLOG_SOURCE_NAME;
         }
         public void Start()
         {
@@ -74,12 +86,14 @@ namespace IPSyncing
                     //_eventLog.WriteEntry("Recived IP: " + retrivedIP);
 
                     // Wait delta seconds
-                    System.Threading.Thread.Sleep(_delta * 500);
+                    System.Threading.Thread.Sleep(_delta * 1000);
                 }
                 catch (Exception ex)
                 {
                     // Writing error to the event log
-                    _eventLog.WriteEntry(ex.Message);
+                    _eventlog.WriteEntry(ex.Message);
+                    
+                    this.Stop();
                 }
             }
         }
@@ -90,11 +104,15 @@ namespace IPSyncing
             {
                 _worker.CancelAsync();
             }
+
+            _eventlog.Close();
+
+
         }
 
         private void DoneSyncing(object sender, RunWorkerCompletedEventArgs e)
         {
-          
+            
         }
 
         private void InProgress(object sender, ProgressChangedEventArgs e)

@@ -12,7 +12,7 @@ namespace DataStreaming
     {
         public string DoWork()
         {
-            return "ok";
+            return "test";
         }
     }
 }
