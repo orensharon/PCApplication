@@ -14,7 +14,7 @@ namespace IPSyncing
     class SyncWorker
     {
         private int _delta;
-        private IPSyncServiceReference.IPSyncClient _client;
+    
         private BackgroundWorker _worker;
         private EventLog _eventlog;
 
@@ -28,10 +28,6 @@ namespace IPSyncing
             // The constructor gets an int of delta - the time to wait between each messaging to server
 
             _delta = delta;
-
-
-            // Creating a new instance of client
-            _client = new IPSyncServiceReference.IPSyncClient();
 
             // Create new custom log if dosent exist
             if (!EventLog.SourceExists(EVENTLOG_SOURCE_NAME))
@@ -65,6 +61,8 @@ namespace IPSyncing
             // Syncing the server
             BackgroundWorker worker = sender as BackgroundWorker;
             string retrivedIP = null;
+            IPSyncServiceReference.IPSyncClient client;
+            PipeClient pipclient;
 
             while (true)
             {
@@ -74,27 +72,51 @@ namespace IPSyncing
                     break;
                 }
 
+                // Create a new instance of a pipe client - to communicate between windows server and application
+                client = new IPSyncServiceReference.IPSyncClient();
+
+                // Create a new pipe to communicate with the application ui
+                pipclient = new PipeClient();
+
                 try
                 {
-                    // Create a new instance of a pipe client - to communicate between windows server and application
-                    PipeClient pipclient = new PipeClient();
+                    // Send the IP address
+                    retrivedIP = client.HelloWorld();
+                    client.Close();
+                    client = null;
+                } 
+                catch (TimeoutException exception)
+                {
+                    // Client timeout exception handling
+                    _eventlog.WriteEntry(exception.GetType().ToString() + " " + exception.Message);
+                    client.Abort();
+                    this.Stop();
+                }
 
-                    retrivedIP = _client.HelloWorld();
+                catch (CommunicationException exception)
+                {
+                    // Client communication exception handling
+                    _eventlog.WriteEntry(exception.GetType().ToString() + " " + exception.Message);
+                    client.Abort();
+                    this.Stop();
+                }
+
+                try
+                {
+                    // Send IP address to the PC application using pipes
                     pipclient.Send(retrivedIP, PIPE_NAME);
-
-
-                    //_eventLog.WriteEntry("Recived IP: " + retrivedIP);
-
-                    // Wait delta seconds
-                    System.Threading.Thread.Sleep(_delta * 1000);
                 }
                 catch (Exception ex)
                 {
-                    // Writing error to the event log
+                    // Piping exception handling
                     _eventlog.WriteEntry(ex.Message);
-                    
+                    client.Abort();
                     this.Stop();
                 }
+
+                // Wait delta seconds
+                System.Threading.Thread.Sleep(_delta * 1000);
+                 
             }
         }
 

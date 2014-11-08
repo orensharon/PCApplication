@@ -74,6 +74,10 @@ namespace IPSyncing
             eventLog.Close();
         }
 
+        public void test(string message)
+        {
+            eventLog.WriteEntry(message);
+        }
 
         private void eventLog_EntryWritten(object sender, EntryWrittenEventArgs e)
         {
