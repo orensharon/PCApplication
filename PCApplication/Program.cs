@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,7 +27,7 @@ namespace PCApplication
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
 
             // Start the IPSync Windows serivce
-            StartIPSyncService();
+            //StartIPSyncService();
 
             // Create a named pipe server to send requests to the windows service (as client)
             PipeServer server = new PipeServer();
@@ -34,11 +35,11 @@ namespace PCApplication
             // Creating event for income messages and starts listening to the pipe
             server.PipeMessage += new DelegateMessage(PipesMessageHandler);
             server.Listen(PIPE_NAME);
-
+            
             // Show the system tray icon.
             using (SystemTrayIcon  pi = new SystemTrayIcon())
             {
-                pi.Display();
+               // pi.Display();
                 
                 // Make sure the application runs!
                 Application.Run();

@@ -37,6 +37,7 @@ namespace IPSyncing
             _eventlog = new EventLog();
             _eventlog.Source = EVENTLOG_SOURCE_NAME;
         }
+
         public void Start()
         {
             // Create a new instance of the background worker thread
@@ -56,6 +57,10 @@ namespace IPSyncing
                 _worker.RunWorkerAsync();
 
         }
+
+
+        /*      Syncing handler: This is the thread worker. handling with syncing with the server.
+         *      Also using pipes to communicate with the gui application.       */     
         private void Syncing(object sender, DoWorkEventArgs e)
         {
             // Syncing the server
@@ -84,11 +89,11 @@ namespace IPSyncing
                     retrivedIP = client.HelloWorld();
                     client.Close();
                     client = null;
-                } 
+                }
                 catch (TimeoutException exception)
                 {
                     // Client timeout exception handling
-                    _eventlog.WriteEntry(exception.GetType().ToString() + " " + exception.Message);
+                    _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
                     this.Stop();
                 }
@@ -96,7 +101,14 @@ namespace IPSyncing
                 catch (CommunicationException exception)
                 {
                     // Client communication exception handling
-                    _eventlog.WriteEntry(exception.GetType().ToString() + " " + exception.Message);
+                    _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
+                    client.Abort();
+                    this.Stop();
+                }
+                catch (Exception exception)
+                {
+                    // unspecific exception handling
+                    _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
                     this.Stop();
                 }
@@ -106,10 +118,11 @@ namespace IPSyncing
                     // Send IP address to the PC application using pipes
                     pipclient.Send(retrivedIP, PIPE_NAME);
                 }
-                catch (Exception ex)
+
+                catch (Exception exception)
                 {
                     // Piping exception handling
-                    _eventlog.WriteEntry(ex.Message);
+                    _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
                     this.Stop();
                 }

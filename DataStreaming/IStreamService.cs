@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
+using System.ServiceModel.Web;
 using System.Text;
 
 namespace DataStreaming
@@ -12,6 +14,30 @@ namespace DataStreaming
     public interface IStreamService
     {
         [OperationContract]
-        string DoWork();
+        [WebInvoke(Method = "POST",
+                   UriTemplate = "/UploadFile?fileName={fileName}")]
+        void FileUpload(RemoteFileInfo request);
+    }
+
+    [MessageContract]
+    public class RemoteFileInfo : IDisposable
+    {
+        [MessageHeader(MustUnderstand = true)]
+        public string FileName;
+
+        [MessageHeader(MustUnderstand = true)]
+        public long Length;
+
+        [MessageBodyMember(Order = 1)]
+        public System.IO.Stream FileByteStream;
+
+        public void Dispose()
+        {
+            if (FileByteStream != null)
+            {
+                FileByteStream.Close();
+                FileByteStream = null;
+            }
+        }
     }
 }

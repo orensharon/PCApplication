@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,29 +9,20 @@ namespace PCConsole
 {
     class Program
     {
-        AppNetworkListUser()
-        {
-            m_nlm = new NetworkListManager();
-        }
-
         static void Main(string[] args)
         {
-            AppNetworkListUser nlmUser = new AppNetworkListUser();
-            Console.WriteLine("Is the machine connected to internet? " + 
-                              nlmUser.NLM.IsConnectedToInternet.ToString());
-            //List the connected networks. There are many other APIs 
-            //can be called to get network information.
-            IEnumNetworks Networks = 
-              nlmUser.NLM.GetNetworks(NLM_ENUM_NETWORK.NLM_ENUM_NETWORK_CONNECTED);
-            foreach (INetwork item in Networks)
+            // Host and Start the data streaming service
+            ServiceHost Streamer = new ServiceHost(typeof(DataStreaming.StreamService));
+
+            Streamer.Open();
+            Console.WriteLine("Service up and running at:");
+            foreach (var ea in Streamer.Description.Endpoints)
             {
-                Console.WriteLine("Connected Network:" + item.GetName() );
+                Console.WriteLine(ea.Address);
             }
-            nlmUser.AdviseforNetworklistManager();
-            Console.WriteLine("Press any key and enter to finish the program");
-            String temp; 
-            temp = Console.ReadLine();
-            nlmUser.UnAdviseforNetworklistManager();
-                }
+            Console.ReadLine();
+
+            Streamer.Close();
+        }
     }
 }
