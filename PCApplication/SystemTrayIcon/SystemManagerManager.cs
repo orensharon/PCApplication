@@ -4,15 +4,15 @@ using System.Windows.Forms;
 using System.Drawing;
 
 
-namespace SystemTrayIcon
+namespace SystemTrayIcon.PCApplication
 {
 
-    class SystemTrayIconManager
+    class SystemManagerManager
     {
 
         private readonly NotifyIcon notifyIcon;
 
-        public SystemTrayIconManager(NotifyIcon notifyIcon)
+        public SystemManagerManager(NotifyIcon notifyIcon)
         {
             this.notifyIcon = notifyIcon;
         }
@@ -49,15 +49,6 @@ namespace SystemTrayIcon
         }
 
 
-        private void openHostsFileItem_Click(object sender, EventArgs e)
-        {
-           
-        }
-
-        private void openHostsFolderItem_Click(object sender, EventArgs e)
-        {
-            
-        }
 
 
        

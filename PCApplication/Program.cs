@@ -21,7 +21,7 @@ namespace PCApplication
         private const string PIPE_NAME = "Server-PC.IPSenderPipe";
         private const string SERVICE_NAME = "IPSender";
 
-        public static MainDialog _SettingDialogInstance;
+        public static SettingsForm _SettingDialogInstance;
 
         public static ServiceHost _StreamerHost;
 

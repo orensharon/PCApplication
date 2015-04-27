@@ -75,7 +75,7 @@ namespace SystemTrayIcon.PCApplication
 
         # region the child forms
 
-        private MainDialog settingsForm;
+        private SettingsForm settingsForm;
         //private System.Windows.Window introForm;
 
         private void ShowGalleryForm()
@@ -94,7 +94,7 @@ namespace SystemTrayIcon.PCApplication
         {
             if (settingsForm == null)
             {
-                settingsForm = new MainDialog { /*HostManager = hostManager*/ };
+                settingsForm = new SettingsForm { /*HostManager = hostManager*/ };
                 settingsForm.Closed += settingsForm_Closed; // avoid reshowing a disposed form
                 settingsForm.Show();
 

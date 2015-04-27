@@ -15,7 +15,7 @@ using System.Windows.Forms;
 
 namespace PCApplication
 {
-    public partial class MainDialog : Form
+    public partial class SettingsForm : Form
     {
        
 
@@ -38,7 +38,7 @@ namespace PCApplication
         private TextBox _IPTextBox;
         public Label _SystemStatusLogLabel;
 
-        public MainDialog()
+        public SettingsForm()
         {
             InitializeComponent();
 
