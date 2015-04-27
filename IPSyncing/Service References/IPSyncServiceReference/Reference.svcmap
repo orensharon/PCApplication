@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="f947d48c-d075-4e4a-8fbc-3b8787d53e54" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="752e16ad-8c18-42d8-a151-dc5c1a78f9a6" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
   <ClientOptions>
     <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
     <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
@@ -22,9 +22,9 @@
     <MetadataSource Address="net.tcp://localhost:9001/SyncService/mex" Protocol="mex" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="9699032a-51b7-41b0-b109-47565f59c0c6" SourceId="1" SourceUrl="net.tcp://localhost:9001/SyncService/mex" />
-    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="a2af142c-51dd-4350-91b4-0f5aa69f3282" SourceId="1" SourceUrl="net.tcp://localhost:9001/SyncService/mex" />
-    <MetadataFile FileName="service1.xsd" MetadataType="Schema" ID="06949bd7-48ae-4294-8ac2-e0df04c4e82d" SourceId="1" SourceUrl="net.tcp://localhost:9001/SyncService/mex" />
+    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="7e4c10e8-3090-43b5-a229-2414141e925b" SourceId="1" SourceUrl="net.tcp://localhost:9001/SyncService/mex" />
+    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="7ce47100-306a-4c96-a836-aeb56c908478" SourceId="1" SourceUrl="net.tcp://localhost:9001/SyncService/mex" />
+    <MetadataFile FileName="service1.xsd" MetadataType="Schema" ID="4f6dc8d8-2246-487b-87a6-a0b58633cf0a" SourceId="1" SourceUrl="net.tcp://localhost:9001/SyncService/mex" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

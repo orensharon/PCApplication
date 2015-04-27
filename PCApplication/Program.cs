@@ -1,10 +1,14 @@
-﻿using System;
+﻿using PCApplication.AccountSession;
+using PCApplication.Sessions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SystemTrayIcon.PCApplication;
 
 namespace PCApplication
 {
@@ -12,41 +16,74 @@ namespace PCApplication
     {
 
         // Delegate field member. using to pass the IP back from the server to the pc application
-        public delegate void NewMessageDelegate(string NewMessage);
+       // public delegate void NewMessageDelegate(string NewMessage);
 
         private const string PIPE_NAME = "Server-PC.IPSenderPipe";
         private const string SERVICE_NAME = "IPSender";
 
+        public static MainDialog _SettingDialogInstance;
+
+        public static ServiceHost _StreamerHost;
+
         [STAThread]
         static void Main()
         {
+            if (!SingleInstance.Start()) { return; }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            // Adding program exit handler to stop IPSync windows service
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
-
-            // Start the IPSync Windows serivce
-            StartIPSyncService();
-
-            // Create a named pipe server to send requests to the windows service (as client)
-            PipeServer server = new PipeServer();
-
-            // Creating event for income messages and starts listening to the pipe
-            server.PipeMessage += new DelegateMessage(PipesMessageHandler);
-            server.Listen(PIPE_NAME);
             
-            // Show the system tray icon.
-            using (SystemTrayIcon  pi = new SystemTrayIcon())
+            try
             {
-                pi.Display();
+                // Adding program exit handler to stop IPSync windows service
+                AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+
+                // Create a named pipe server to send requests to the windows service (as client)
+                PipeServer server = new PipeServer();
+
+                // Creating event for income messages and starts listening to the pipe
+                server.PipeMessage += new DelegateMessage(PipesMessageHandler);
+                server.Listen(PIPE_NAME);
+
+
+
+                // Clear previous log file
+                SystemStatusLog.ClearSystemStatusLog();
+
+                SystemSession systemSession = new SystemSession();
+
+                // Running the application
+                var applicationContext = new CustomApplicationContext();
+
+
+                // Start sync service if user is logged in
+                if (systemSession.getLoginState() == true)
+                {
+
+                    // Set the status icon to coneecting
+                    _SettingDialogInstance.UpdateConnectionStatusIcon(2);
+
+                    // Start the IP Syncing service
+                    ProgramBL.StartIPSyncService(systemSession.getUserToken());
+
+                    // Start the host server
+                    ProgramBL.StartServer();
+
+                }
                 
-                // Make sure the application runs!
-                Application.Run();
+                Application.Run(applicationContext);
+                
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Program Terminated Unexpectedly",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            SingleInstance.Stop();
+
         }
 
-        private static void StartIPSyncService()
+        /*
+        public static void StartIPSyncService(string token)
         {
             // Starting the IPSync service
             ServiceController service = new ServiceController(SERVICE_NAME);
@@ -54,7 +91,10 @@ namespace PCApplication
             {
                 TimeSpan timeout = TimeSpan.FromMilliseconds(1000);
 
-                service.Start();
+                string[] args = new string[1];
+                args[0] = token;
+
+                service.Start(args);
                 service.WaitForStatus(ServiceControllerStatus.Running, timeout);
             }
             catch
@@ -64,7 +104,7 @@ namespace PCApplication
             }
         }
 
-        static void OnProcessExit(object sender, EventArgs e)
+        public static void StopIPSyncService()
         {
             // Stoping the IPSync service
             ServiceController service = new ServiceController(SERVICE_NAME);
@@ -74,28 +114,187 @@ namespace PCApplication
 
                 service.Stop();
                 service.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
-                
+
             }
             catch
             {
                 // TODO:
                 // Add exception to log
             }
+        }
 
-            // Final disposing of the system tray icon
-            using (SystemTrayIcon pi = new SystemTrayIcon())
+        
+
+
+        public static async Task LoginAttemptASync(Action<string> callback)
+        {
+            string message = null;
+            UserLoginServiceReference.UserLoginClient loginClient;
+            UserLoginServiceReference.LoginResponse response;
+            UserLoginServiceReference.LoginRequest request;
+
+            SettingsSession settingsSession = new SettingsSession();
+            SystemSession systemSession = new SystemSession();
+
+            //int userID = 0;
+
+            request = new UserLoginServiceReference.LoginRequest();
+            request.Username = settingsSession.getUserName();
+            request.Password = settingsSession.getPassword();
+
+            response = null;
+
+            // Connect to server to log in
+            loginClient = new UserLoginServiceReference.UserLoginClient();
+            try
             {
-                pi.Dispose();
+                var task = loginClient.LoginAttemptAsync(request);
+                response = await task;
+                loginClient.Close();
+                loginClient = null;
             }
+            catch (System.ServiceProcess.TimeoutException exception)
+            {
+                // Client timeout exception handling
+                loginClient.Abort();
+                message = exception.Message;
+            }
+
+            catch (CommunicationException exception)
+            {
+                // Client communication exception handling
+                loginClient.Abort();
+                
+                if (exception.InnerException is WebException)
+                {
+                    string statusCode;
+
+                    WebException webException = exception.InnerException as WebException;
+
+                    if (webException.Status == WebExceptionStatus.ConnectFailure)
+                    {
+                        // Means host not found
+                        statusCode = webException.Status.ToString();
+                    }
+                    else if (webException.Status == WebExceptionStatus.NameResolutionFailure)
+                    {
+                        // Means could not be resolved
+                        statusCode = webException.Status.ToString();
+                    }
+                    else
+                    {
+                        // Other request errors
+
+                        HttpWebResponse errorResponse = webException.Response as HttpWebResponse;
+                        statusCode = errorResponse.StatusCode.ToString();
+                    }
+                    switch (statusCode)
+                    {
+                        case "BadRequest":
+                            message = "Username or password are incorrect.\nPlease try again.";
+                            break;
+                        case "ConnectFailure":
+                            message = "Unable to reach server\nPlease try again later.";
+                            break;
+                        case "NameResolutionFailure":
+                            message = "Request could not be resolved";
+                            break;
+                        default:
+                            message = statusCode;
+                            break;
+                    }
+                }
+
+            }
+            catch (Exception exception)
+            {
+                // unspecific exception handling
+                loginClient.Abort();
+                message = exception.Message;
+            }
+
+            // Check if login was success
+            if (response!= null && response.Token != null)
+            {
+                // Save settings for logged-in user
+                systemSession.Login();
+                systemSession.setUserToken(response.Token);
+               
+                
+                // Start the IP syncing service
+                Program.StartIPSyncService(systemSession.getUserToken());
+
+
+                // Update status log
+                SystemStatusLog.WriteToSystemStatusLog(Constants.STATUS_KEY_LOGGED);
+            }
+            else
+            {
+              //  message = "some error";
+                
+                systemSession.Logout();
+
+
+            }
+            callback(message);
+        }
+
+
+        public static void LogoutAttempt()
+        {
+            SettingsSession settingsSession = new SettingsSession();
+            SystemSession systemSession = new SystemSession();
+
+            // Update status log
+            SystemStatusLog.WriteToSystemStatusLog(Constants.STATUS_KEY_LOGGED_OUT);
+            
+            StopIPSyncService();
+            systemSession.Logout();
+            systemSession.setUserToken(null);
+            settingsSession.setServerState(false);
+
+        }
+ */
+
+        static void OnProcessExit(object sender, EventArgs e)
+        {
+            SystemSession systemSession = new SystemSession();
+
+            if (systemSession.getLoginState() == true)
+            {
+                ProgramBL.StopIPSyncService();
+                ProgramBL.StopServer();
+            }
+
         }
 
         private static void PipesMessageHandler(string message)
         {
             // Inconimg message from named pipe handler
 
+            SystemSession systemSession = new SystemSession();
+            string trimmedMessage;
+
+            trimmedMessage = message.TrimEnd(new char[] { '\0' });
             try
             {
-                Console.WriteLine(message);
+
+                // Means the ip sync request faild
+                if (trimmedMessage.Equals(String.Empty))
+                {
+                    ProgramBL.LogoutAttempt();
+
+                }
+                else
+                {
+
+                    // IP is ok
+                    //_SettingDialogInstance.UpdateConnectionStatusIcon(0);
+                    systemSession.setIPAddress(trimmedMessage);
+                    Console.WriteLine(trimmedMessage);
+                }
+               // _SettingDialogInstance._IsConnecting = false;
+                _SettingDialogInstance.UpdateUI();
             }
             catch (Exception ex)
             {

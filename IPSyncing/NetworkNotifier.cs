@@ -60,7 +60,7 @@ namespace IPSyncing
                 // Create a new instance of a pipe client - to communicate between windows server and application
                 PipeClient pipclient = new PipeClient();
 
-                retrivedIP = client.HelloWorld();
+                retrivedIP = client.Sync();
                 client.Close();
                 client = null;
 
@@ -103,7 +103,7 @@ namespace IPSyncing
 
             try
             {
-                string retrivedIP = client.HelloWorld();
+                string retrivedIP = client.Sync();
                 client.Close();
                 client = null;
 

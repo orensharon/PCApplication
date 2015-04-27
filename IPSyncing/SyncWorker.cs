@@ -14,6 +14,7 @@ namespace IPSyncing
     class SyncWorker
     {
         private int _delta;
+        private string _Token;
     
         private BackgroundWorker _worker;
         private EventLog _eventlog;
@@ -23,11 +24,13 @@ namespace IPSyncing
         private const string EVENTLOG_SOURCE_NAME = "IPSenderSource";
         private const string EVENTLOG_NAME = "IPSenderLog";
 
-        public SyncWorker(int delta)
+
+        public SyncWorker(int delta, string token)
         {
             // The constructor gets an int of delta - the time to wait between each messaging to server
 
             _delta = delta;
+            _Token = token;
 
             // Create new custom log if dosent exist
             if (!EventLog.SourceExists(EVENTLOG_SOURCE_NAME))
@@ -65,10 +68,10 @@ namespace IPSyncing
         {
             // Syncing the server
             BackgroundWorker worker = sender as BackgroundWorker;
-            string retrivedIP = null;
+            string retrivedIP;
             IPSyncServiceReference.IPSyncClient client;
             PipeClient pipclient;
-
+            
             while (true)
             {
                 if ((worker.CancellationPending == true))
@@ -76,6 +79,8 @@ namespace IPSyncing
                     e.Cancel = true;
                     break;
                 }
+
+                retrivedIP = null;
 
                 // Create a new instance of a pipe client - to communicate between windows server and application
                 client = new IPSyncServiceReference.IPSyncClient();
@@ -86,7 +91,7 @@ namespace IPSyncing
                 try
                 {
                     // Send the IP address
-                    retrivedIP = client.HelloWorld();
+                    retrivedIP = client.Sync(_Token);
                     client.Close();
                     client = null;
                 }
@@ -95,6 +100,7 @@ namespace IPSyncing
                     // Client timeout exception handling
                     _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
+                    pipclient.Send(String.Empty, PIPE_NAME);
                     this.Stop();
                 }
 
@@ -103,6 +109,8 @@ namespace IPSyncing
                     // Client communication exception handling
                     _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
+
+                    pipclient.Send(String.Empty, PIPE_NAME);
                     this.Stop();
                 }
                 catch (Exception exception)
@@ -110,6 +118,7 @@ namespace IPSyncing
                     // unspecific exception handling
                     _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
+                    pipclient.Send(String.Empty, PIPE_NAME);
                     this.Stop();
                 }
 
@@ -124,6 +133,7 @@ namespace IPSyncing
                     // Piping exception handling
                     _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
                     client.Abort();
+                    pipclient.Send(null, PIPE_NAME);
                     this.Stop();
                 }
 

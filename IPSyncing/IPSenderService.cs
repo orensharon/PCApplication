@@ -35,19 +35,17 @@ namespace IPSyncing
         {
             // By starting the IPSender windows service - creating a new instance of IPSyncClient
             // And send it to backgrounder worker thread in type of SyncWorker
+            string token;
             
             string logString = "Service started";
-            _syncer = new SyncWorker(60);
 
-            try
-            {
-                // Start the background thread
-                _syncer.Start();
-            }
-            catch (Exception ex)
-            {
-                logString = ex.Message;
-            }
+            // Read user id from args
+            token = args[0];
+            
+            _syncer = new SyncWorker(120, token);
+
+            // Start the background thread
+            _syncer.Start();
 
             // Write to eventlog
             eventLog.WriteEntry(logString);

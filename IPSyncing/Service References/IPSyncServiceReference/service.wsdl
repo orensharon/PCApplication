@@ -39,24 +39,43 @@
       <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
     </xsd:schema>
   </wsdl:types>
-  <wsdl:message name="IIPSync_HelloWorld_InputMessage">
-    <wsdl:part name="parameters" element="tns:HelloWorld" />
+  <wsdl:message name="IIPSync_Sync_InputMessage">
+    <wsdl:part name="parameters" element="tns:Sync" />
   </wsdl:message>
-  <wsdl:message name="IIPSync_HelloWorld_OutputMessage">
-    <wsdl:part name="parameters" element="tns:HelloWorldResponse" />
+  <wsdl:message name="IIPSync_Sync_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SyncResponse" />
+  </wsdl:message>
+  <wsdl:message name="IIPSync_DiscardPCIP_InputMessage">
+    <wsdl:part name="parameters" element="tns:DiscardPCIP" />
+  </wsdl:message>
+  <wsdl:message name="IIPSync_DiscardPCIP_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DiscardPCIPResponse" />
   </wsdl:message>
   <wsdl:portType name="IIPSync">
-    <wsdl:operation name="HelloWorld">
-      <wsdl:input wsaw:Action="http://tempuri.org/IIPSync/HelloWorld" message="tns:IIPSync_HelloWorld_InputMessage" />
-      <wsdl:output wsaw:Action="http://tempuri.org/IIPSync/HelloWorldResponse" message="tns:IIPSync_HelloWorld_OutputMessage" />
+    <wsdl:operation name="Sync">
+      <wsdl:input wsaw:Action="http://tempuri.org/IIPSync/Sync" message="tns:IIPSync_Sync_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IIPSync/SyncResponse" message="tns:IIPSync_Sync_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DiscardPCIP">
+      <wsdl:input wsaw:Action="http://tempuri.org/IIPSync/DiscardPCIP" message="tns:IIPSync_DiscardPCIP_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IIPSync/DiscardPCIPResponse" message="tns:IIPSync_DiscardPCIP_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="IPSync_netTcpEndPoint" type="tns:IIPSync">
     <wsp:PolicyReference URI="#IPSync_netTcpEndPoint_policy">
     </wsp:PolicyReference>
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
-    <wsdl:operation name="HelloWorld">
-      <soap12:operation soapAction="http://tempuri.org/IIPSync/HelloWorld" style="document" />
+    <wsdl:operation name="Sync">
+      <soap12:operation soapAction="http://tempuri.org/IIPSync/Sync" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DiscardPCIP">
+      <soap12:operation soapAction="http://tempuri.org/IIPSync/DiscardPCIP" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

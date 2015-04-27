@@ -11,6 +11,21 @@
     <AssemblyName>PCApplication</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,6 +49,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
@@ -41,11 +59,25 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Compile Include="ProgramBL.cs" />
+    <Compile Include="Service References\IPSyncServiceReference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\UserLoginServiceReference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Sessions\SettingsSession.cs" />
+    <Compile Include="Sessions\SystemSession.cs" />
     <Compile Include="MainDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -55,8 +87,12 @@
     <Compile Include="PipeServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SystemTrayIcon.cs" />
-    <Compile Include="SystemTrayIconContextMenu.cs" />
+    <Compile Include="SystemStatusLog.cs" />
+    <Compile Include="SystemTrayIcon\CustomApplicationContext.cs" />
+    <Compile Include="SystemTrayIcon\ProgramInfo.cs" />
+    <Compile Include="SystemTrayIcon\SingleInstance.cs" />
+    <Compile Include="SystemTrayIcon\SystemManagerManager.cs" />
+    <Compile Include="SystemTrayIcon\WinAPI.cs" />
     <EmbeddedResource Include="MainDialog.resx">
       <DependentUpon>MainDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -79,18 +115,97 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Service References\IPSyncServiceReference\service.wsdl" />
+    <None Include="Service References\IPSyncServiceReference\service.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\IPSyncServiceReference\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\UserLoginServiceReference\LoginService.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\UserLoginServiceReference\PCApplication.UserLoginServiceReference.LoginResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\UserLoginServiceReference\service.wsdl" />
+    <None Include="Service References\UserLoginServiceReference\service.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\UserLoginServiceReference\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\system_tray_icon.ico" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataStreaming\DataStreaming.csproj">
       <Project>{15b3e0d2-6217-493a-a690-158c497f5318}</Project>
       <Name>DataStreaming</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\system_tray_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\IPSyncServiceReference\" />
+    <WCFMetadataStorage Include="Service References\UserLoginServiceReference\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_connecting.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_offline.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_online.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\UserLoginServiceReference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\UserLoginServiceReference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\UserLoginServiceReference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\IPSyncServiceReference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\IPSyncServiceReference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\IPSyncServiceReference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
