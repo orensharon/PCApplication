@@ -49,30 +49,6 @@ namespace PCApplication.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsLogged {
-            get {
-                return ((bool)(this["IsLogged"]));
-            }
-            set {
-                this["IsLogged"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0")]
-        public string PCIP {
-            get {
-                return ((string)(this["PCIP"]));
-            }
-            set {
-                this["PCIP"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Token {
             get {
@@ -80,6 +56,30 @@ namespace PCApplication.Properties {
             }
             set {
                 this["Token"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0")]
+        public string SafeIP {
+            get {
+                return ((string)(this["SafeIP"]));
+            }
+            set {
+                this["SafeIP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsLogged {
+            get {
+                return ((bool)(this["IsLogged"]));
+            }
+            set {
+                this["IsLogged"] = value;
             }
         }
         

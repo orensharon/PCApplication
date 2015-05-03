@@ -6,48 +6,35 @@ using System.Threading.Tasks;
 
 namespace PCApplication.Sessions
 {
-    class SettingsSession
+    public class SettingsSession
     {
-        /*
-         * Username setter and getter
-         */
-        public void setUserName(string username)
+
+
+        #region media tab
+
+        public void setPhotoQuality(int quality)
         {
-            PCApplication.Properties.Settings.Default.Username = username;
-            PCApplication.Properties.Settings.Default.Save();
+            // TODO:
         }
 
-        public string getUserName()
+        public int getPhotoQuality() 
         {
-            return Convert.ToString(PCApplication.Properties.Settings.Default.Username);
+            // TODO:
+            return 100;
+        }
+
+        public void setVideoQuality(int quality)
+        {
+            // TODO:
+        }
+
+        public int getVideoQuality()
+        {
+            // TODO:
+            return 100;
         }
 
 
-
-        /*
-         * Password setter and getter
-         */
-        public void setPassword(string password)
-        {
-            PCApplication.Properties.Settings.Default.Password = password;
-            PCApplication.Properties.Settings.Default.Save();
-        }
-
-        public string getPassword()
-        {
-            return Convert.ToString(PCApplication.Properties.Settings.Default.Password);
-        }
-
-        public void setServerState(bool state)
-        {
-            PCApplication.Properties.Settings.Default.IsServerRunning = state;
-            PCApplication.Properties.Settings.Default.Save();
-        }
-
-        public bool getServerState()
-        {
-            return Convert.ToBoolean(PCApplication.Properties.Settings.Default.IsServerRunning);
-        }
-
+        #endregion media tab
     }
 }

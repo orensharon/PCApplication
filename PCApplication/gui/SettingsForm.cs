@@ -1,6 +1,4 @@
-﻿using PCApplication.AccountSession;
-using PCApplication.Sessions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PCApplication.Sessions;
 
 namespace PCApplication
 {
@@ -77,21 +76,6 @@ namespace PCApplication
             
         }
 
-
-        private void HandleMainTabSelection(object sender, EventArgs e)
-        {
-            // Get the tab string
-            TabControl tab = ((TabControl)sender);
-            string tabString = tab.SelectedTab.Text;
-
-            if (tabString.Equals("Connection"))
-            {
-                // Thread
-                //ConnectionTabContainer_RoutingGroupBox_CurrentIPTextBox.Text = getExternalIp();
-            }
-
-        }
-
         private void cmdOK_Click(object sender, EventArgs e)
         {
             // TODO: apply settings to hide window
@@ -102,7 +86,7 @@ namespace PCApplication
             //_IsConnecting = false;
             UpdateConnectionStatusIcon(1);
             ProgramBL.LogoutAttempt();
-            UpdateUI();
+            //UpdateUI();
             
         }
 
@@ -139,8 +123,8 @@ namespace PCApplication
                 // User attempt to login
                
                 // Save user login data into settings
-                _SettingsSession.setUserName(_UsernameTextBox.Text.Trim());
-                _SettingsSession.setPassword(_PasswordTextBox.Text.Trim());
+                _SystemSession.setUserName(_UsernameTextBox.Text.Trim());
+                _SystemSession.setPassword(_PasswordTextBox.Text.Trim());
 
                 LoginAttemptASync();
 
@@ -257,21 +241,22 @@ namespace PCApplication
                     UpdateConnectionStatusIcon(connectionStatus);
              //   }
 
-                if (!_SettingsSession.getUserName().Equals(""))
+                if (!_SystemSession.getUserName().Equals(""))
                 {
 
-                    _UsernameTextBox.Text = _SettingsSession.getUserName();
+                    _UsernameTextBox.Text = _SystemSession.getUserName();
                 }
 
-                if (!_SettingsSession.getPassword().Equals(""))
+                if (!_SystemSession.getPassword().Equals(""))
                 {
-                    _PasswordTextBox.Text = _SettingsSession.getPassword();
+                    _PasswordTextBox.Text = _SystemSession.getPassword();
                 }
 
                 
                 _SystemStatusLogLabel.Text = SystemStatusLog.GetSystemStatusLog();
             });
         }
+
 
 
     }

@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Reflection;
 using PCApplication;
+using PCApplication.gui;
+using System.IO;
 
 /*
  * ==============================================================
@@ -50,6 +52,7 @@ namespace SystemTrayIcon.PCApplication
     public class CustomApplicationContext : ApplicationContext
     {
 
+        static string STORAGE_MAIM_PATH = Application.StartupPath + @"\AppData\Contents\";
         private static readonly string DefaultTooltip = "KeepItSafe | Connection status: Offline";
         private readonly SystemManagerManager _SystemTrayIconManager;
 
@@ -60,6 +63,7 @@ namespace SystemTrayIcon.PCApplication
 			InitializeContext();
             _SystemTrayIconManager = new SystemManagerManager(notifyIcon);
             ShowSettingsForm();
+            //ShowGalleryForm();
 		}
 
         private void ContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
@@ -68,7 +72,7 @@ namespace SystemTrayIcon.PCApplication
             _SystemTrayIconManager.BuildContextMenu(notifyIcon.ContextMenuStrip);
 
             notifyIcon.ContextMenuStrip.Items.Add(_SystemTrayIconManager.ToolStripMenuItemWithHandler("&Settings", showSettingsItem_Click));
-            notifyIcon.ContextMenuStrip.Items.Add(_SystemTrayIconManager.ToolStripMenuItemWithHandler("&Gallery", showSettingsItem_Click));
+            notifyIcon.ContextMenuStrip.Items.Add(_SystemTrayIconManager.ToolStripMenuItemWithHandler("&Gallery", showGalleryItem_Click));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(_SystemTrayIconManager.ToolStripMenuItemWithHandler("&Exit", exitItem_Click));
         }
@@ -76,18 +80,18 @@ namespace SystemTrayIcon.PCApplication
         # region the child forms
 
         private SettingsForm settingsForm;
-        //private System.Windows.Window introForm;
+        private GalleryForm galleryForm;
 
         private void ShowGalleryForm()
         {
-          //  if (introForm == null)
-          //  {
-           //     introForm = new WpfFormLibrary.IntroForm();
-           //     introForm.Closed += mainForm_Closed; // avoid reshowing a disposed form
-           //     ElementHost.EnableModelessKeyboardInterop(introForm);
-           //     introForm.Show();
-           // }
-           // else { introForm.Activate(); }
+            if (galleryForm == null)
+            {
+                galleryForm = new GalleryForm();
+                galleryForm.Closed += galleryForm_Closed; // avoid reshowing a disposed form
+                //ElementHost.EnableModelessKeyboardInterop(galleryForm);
+                galleryForm.Show();
+            }
+            else { galleryForm.Activate(); }
         }
 
         private void ShowSettingsForm()
@@ -117,7 +121,26 @@ namespace SystemTrayIcon.PCApplication
 
 
         // attach to context menu items
-        private void showGalleryItem_Click(object sender, EventArgs e)     { ShowGalleryForm();    }
+        private void showGalleryItem_Click(object sender, EventArgs e)     { 
+            //ShowGalleryForm();    
+
+            // When the form loads, open this web page.
+            try
+            {
+                // Open the gallery html
+                System.Diagnostics.Process.Start(STORAGE_MAIM_PATH + "lib\\PhotoGallery\\index.html");
+            }
+            catch
+            {
+                MessageBox.Show("Oops...:(\nSomething went wrong...", "File loading error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        
+        }
+
+        private bool needToUpdateHtml()
+        {
+            return true;
+        }
         private void showSettingsItem_Click(object sender, EventArgs e)  { ShowSettingsForm();  }
 
         // null out the forms so we know to create a new one.
@@ -125,7 +148,7 @@ namespace SystemTrayIcon.PCApplication
             settingsForm = null; 
             Program._SettingDialogInstance = null; 
         }
-        private void mainForm_Closed(object sender, EventArgs e)        { /*introForm = null; */  }
+        private void galleryForm_Closed(object sender, EventArgs e) { galleryForm.webBrowser1.Dispose(); galleryForm = null; }
 
         # endregion the child forms
 

@@ -1,7 +1,10 @@
-﻿using HttpMultipartParser;
+﻿
+using HttpMultipartParser;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -25,6 +28,11 @@ namespace DataStreaming
 
         // TODO: constant (names from android)
 
+
+        #region upload content
+
+        
+
         public string Upload(Stream stream)
         {
             string hashedFileContent = "";
@@ -35,6 +43,7 @@ namespace DataStreaming
             // First we need to get the boundary from the header, this is sent
             // with the HTTP request. We can do that in WCF using the WebOperationConext:
             var type = WebOperationContext.Current.IncomingRequest.Headers["Content-Type"];
+            var realContentHash = WebOperationContext.Current.IncomingRequest.Headers["Content-MD5"];
 
             // Now we want to strip the boundary out of the Content-Type, currently the string
             // looks like: "multipart/form-data; boundary=---------------------124123qase124"
@@ -65,31 +74,183 @@ namespace DataStreaming
             // Get the files from the request body
             foreach (FilePart file in parser.Files)
             {
-                using (System.IO.FileStream output = new System.IO.FileStream(localPath + file.FileName, FileMode.Create))
-                {
-                    file.Data.CopyTo(output);
+                // File integrity verification using MD5
+                hashedFileContent = utils.MD5Checksum.GetMD5HashFromFile(file.Data);
+                Console.WriteLine(hashedFileContent);
 
-                    // File integrity verification using MD5
-                    hashedFileContent = utils.MD5Checksum.GetMD5Hash(localPath + file.FileName);
-                    Console.WriteLine(hashedFileContent);
+
+                // Check if file is damaged with the equation of the md-5 hash
+                if (!hashedFileContent.Equals(realContentHash))
+                {
+                    // TODO: fix to other error
+                    SetResponseHttpStatus(HttpStatusCode.Conflict);
+                    return null;
                 }
 
+                using (Image img = Image.FromStream(file.Data))
+                {
+                    SavePhoto(localPath, file, img);
+                    UpdateHtml();
+                }  
             }
-
-            
 
             return hashedFileContent;
 
         }
 
-        public string UploadContact(ContactRequest request)
+        private void UpdateHtml()
+        {
+            // Update the html file
+            // TODO: Check if need  to update according the date, check what the last time new content arrived and the last time updated
+
+            if (needToUpdateHtml())
+            {
+                string html = "";
+                using (StreamReader sr = new StreamReader(STORAGE_MAIM_PATH + "lib/PhotoGallery/core/gallery.html"))
+                {
+                    html = sr.ReadToEnd();
+                }
+
+                // Getting all images in the photos folder
+                DirectoryInfo dir = new DirectoryInfo(STORAGE_MAIM_PATH + "Photo");
+                FileInfo[] images = dir.GetFiles("*.jpg");
+                string body = "";
+
+                var rimages = images.Reverse();
+
+                // For each image in folder create jquery row
+                foreach (FileInfo image in rimages)
+                {
+                    if (!image.Name.StartsWith("small_") && !image.Name.StartsWith("medium_"))
+                    {
+                        body += "{image : '../../Photo/" + image.Name + "', title : 'Image Credit: Maria Kazvan', thumb : '../../Photo/" + image.Name + "', url : ''},\n";
+                    }
+
+                }
+                body = body.Substring(0, body.Length - 2);
+                html = html.Replace("<!--###CONTENT###-->", body);
+                using (System.IO.StreamWriter htmlFile = new System.IO.StreamWriter(STORAGE_MAIM_PATH + "lib\\PhotoGallery\\index.html"))
+                {
+                    htmlFile.Write(html);
+                }
+            }
+        }
+        private bool needToUpdateHtml()
+        {
+            return true;
+        }
+
+
+        private void SavePhoto(string localPath, FilePart file, Image img)
+        {
+            // Rotate photo according the orientation
+            if (Array.IndexOf(img.PropertyIdList, 274) > -1)
+            {
+                var orientation = (int)img.GetPropertyItem(274).Value[0];
+                switch (orientation)
+                {
+                    case 1:
+                        img.RotateFlip(RotateFlipType.RotateNoneFlipNone);
+                        break;
+                    case 2:
+                        img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        break;
+                    case 3:
+                        img.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        break;
+                    case 4:
+                        img.RotateFlip(RotateFlipType.Rotate180FlipX);
+                        break;
+                    case 5:
+                        img.RotateFlip(RotateFlipType.Rotate90FlipX);
+                        break;
+                    case 6:
+                        img.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                        break;
+                    case 7:
+                        img.RotateFlip(RotateFlipType.Rotate270FlipX);
+                        break;
+                    case 8:
+                        img.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                        break;
+                }
+                // This EXIF data is now invalid and should be removed.
+                img.RemovePropertyItem(274);
+            }
+
+
+            ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+
+            // Create an Encoder object based on the GUID 
+            // for the Quality parameter category.
+            System.Drawing.Imaging.Encoder myEncoder =
+                System.Drawing.Imaging.Encoder.Quality;
+
+            EncoderParameters myEncoderParameters = new EncoderParameters(1);
+  
+            EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 100L);
+            myEncoderParameters.Param[0] = myEncoderParameter;
+            img.Save(localPath + file.FileName, jpgEncoder, myEncoderParameters);
+
+            CreateThumbnail(200, localPath, file.FileName, img);
+        }
+        private ImageCodecInfo GetEncoder(ImageFormat format)
         {
 
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
 
-            if (request != null && request.Token != null)
+            foreach (ImageCodecInfo codec in codecs)
             {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
+        private static void CreateThumbnail(int width, string localPath, string fileName, Image image)
+        {
+            // Making thumbmail images
+            
+            float imgWidth = image.PhysicalDimension.Width;
+            float imgHeight = image.PhysicalDimension.Height;
+            float imgSize = imgHeight > imgWidth ? imgHeight : imgWidth;
+            float imgResize = imgSize <= width ? (float)1.0 : width / imgSize;
+            imgWidth *= imgResize; imgHeight *= imgResize;
+
+            using (System.Drawing.Image thumb = image.GetThumbnailImage((int)imgWidth, (int)imgHeight, delegate() { return false; }, (IntPtr)0))
+            {
+                string prefix;
+                if (width == 200)
+                {
+                    prefix = "small";
+                }
+                else
+                {
+                    prefix = "medium";
+                }
+                thumb.Save(localPath + prefix + "_" + fileName);
+            }
+
+
+            
+        }
+        private bool ThumbnailCallback()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public string UploadContact(ContactRequest request)
+        {
+            var realContentHash = WebOperationContext.Current.IncomingRequest.Headers["Content-MD5"];
+            var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
+            if (request != null)
+            {
+                
+
                 // Decode the user id from the token
-                var payLoad = JWTManager.DecodeToken(request.Token) as IDictionary<string, object>;
+                var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
 
                 // Authenticate the request
                 if (payLoad == null)
@@ -101,19 +262,112 @@ namespace DataStreaming
 
                 // TODO: MD5 hash check
 
+                // Creating hash from request body
+                string contentHash = realContentHash; //utils.MD5Checksum.StringMD5Hash(tempMD5);
 
-                //string hashedFileContent = utils.MD5Checksum.StringMD5Hash(request.ToString());
+                // Checking if the hashes are equal
+                if (!contentHash.Equals(realContentHash))
+                {
+                    // Means there is a problem
+                    SetResponseHttpStatus(HttpStatusCode.Conflict);
+                    return null;
+                }
+
                 //Console.WriteLine(OperationContext.Current.RequestContext.RequestMessage.ToString() + ", " + hashedFileContent);
 
                 HandleSaveContact(request);
-                return "ok";
+                return realContentHash;
             }
 
             SetResponseHttpStatus(HttpStatusCode.InternalServerError);
             return null;
         }
+        
 
 
+        #endregion upload content
+
+
+
+        /*
+        #region download content
+
+
+
+        public Stream Download(string context, string fileName)
+        {
+            string downloadFilePath = "";
+
+            if (context.Equals("internal"))
+            {
+                WebOperationContext.Current.OutgoingResponse.ContentType = "image/png";
+                downloadFilePath = STORAGE_MAIM_PATH + @"lib/img";
+
+            } else if (context.Equals("external")) {
+                downloadFilePath = STORAGE_MAIM_PATH + @"Photo";
+                
+                WebOperationContext.Current.OutgoingResponse.ContentType = "image/jpg";
+            }
+
+           
+            FileStream f = new FileStream(downloadFilePath + "\\" + fileName, FileMode.Open);
+            int length = (int)f.Length;
+            WebOperationContext.Current.OutgoingResponse.ContentLength = length;
+            byte[] buffer = new byte[length];
+            int sum = 0;
+            int count;
+            while ((count = f.Read(buffer, sum, length - sum)) > 0)
+            {
+                sum += count;
+            }
+            f.Close();
+            return new MemoryStream(buffer); 
+        }
+
+        public Stream getGallery()
+        {
+
+
+            string html = File.ReadAllText(STORAGE_MAIM_PATH + "lib/gallery.html");
+            
+           
+            
+            // Getting all images in the photos folder
+            DirectoryInfo dir = new DirectoryInfo(STORAGE_MAIM_PATH + "Photo");
+            FileInfo[] images = dir.GetFiles("*.jpg");
+            string body = "";
+
+            var rimages = images.Reverse();
+
+            // For each image in folder create jquery row
+            foreach (FileInfo image in rimages)
+            {
+                if (!image.Name.StartsWith("small_")) {
+                    body += @"{image : '../Download/external/" + image.Name + 
+                            @"', title : 'Image Credit: Maria Kazvan', thumb : '../Download/external/" + image.Name + 
+                            @"', url : '../Download/" + image.Name + @"'},";
+                }
+                
+            }
+            // pushing the image rows
+            body = body.Substring(0, body.Length - 1);
+            html = html.Replace("###CONTENT###", body);
+           
+            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+            int length = (int)html.Length;
+            WebOperationContext.Current.OutgoingResponse.ContentLength = length;
+            
+            byte[] byteArray = Encoding.ASCII.GetBytes(html);
+      
+
+            return new MemoryStream(byteArray); 
+        }
+
+        
+        
+        #endregion download content
+
+        */
 
 
         // Private functions
@@ -159,7 +413,28 @@ namespace DataStreaming
             }
             else
             {
+                // Means contact should be exists
+                XElement itemElement = query.FirstOrDefault();
+
+                itemElement.ReplaceWith(request.toXml());
+                   
+                /*contacts.Element("Contacts")
+                      .Elements("Contact")
+                      .Where(x => (string)x.Attribute("ID") == (string)itemElement.Attribute("ID"))
+                      .Remove();*/
+
+                contacts.Save(localPath + "contacts.xml");
+                    
+                    //itemElement.ReplaceWith(request.toXml());
+
+                    
+                
+
+                contacts.Save(localPath + "contacts.xml");
+                
+
             }
+           
         }
 
         private string CreateContentDirectory(string typeOfContent)

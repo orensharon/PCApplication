@@ -72,6 +72,11 @@
       <DependentUpon>GalleryForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ProgramBL.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Service References\IPSyncServiceReference\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -82,8 +87,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="Sessions\SettingsSession.cs" />
-    <Compile Include="Sessions\SystemSession.cs" />
     <Compile Include="gui\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,12 +96,17 @@
     <Compile Include="PipeServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="sessions\SettingsSession.cs" />
+    <Compile Include="sessions\SystemSession.cs" />
     <Compile Include="SystemStatusLog.cs" />
     <Compile Include="SystemTrayIcon\CustomApplicationContext.cs" />
     <Compile Include="SystemTrayIcon\ProgramInfo.cs" />
     <Compile Include="SystemTrayIcon\SingleInstance.cs" />
     <Compile Include="SystemTrayIcon\SystemManagerManager.cs" />
     <Compile Include="SystemTrayIcon\WinAPI.cs" />
+    <EmbeddedResource Include="gui\GalleryForm.resx">
+      <DependentUpon>GalleryForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="gui\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -116,11 +124,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
     <None Include="Service References\IPSyncServiceReference\service.wsdl" />
     <None Include="Service References\IPSyncServiceReference\service.xsd">
       <SubType>Designer</SubType>
@@ -213,6 +216,7 @@
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

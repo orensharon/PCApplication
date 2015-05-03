@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCApplication.Sessions
+namespace PCApplication
 {
     public class Constants
     {

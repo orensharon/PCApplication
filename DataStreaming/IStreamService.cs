@@ -15,6 +15,9 @@ namespace DataStreaming
     [ServiceContract]
     public interface IStreamService
     {
+
+        #region upload content
+
         [OperationContract]
         [WebInvoke(Method = "POST",
             RequestFormat = WebMessageFormat.Json,
@@ -32,10 +35,32 @@ namespace DataStreaming
             UriTemplate = "/Upload/Contact")]
         string UploadContact(ContactRequest request);
 
+        #endregion upload content
+       
+        /*
+        #region download content
 
+        [OperationContract]
+        [WebGet(
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare,
+            UriTemplate = "/Download/{context}/{fileName}")]
+        Stream Download(string context, string fileName);
+
+        [OperationContract]
+        [WebGet(
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare,
+            UriTemplate = "/Gallery/")]
+        Stream getGallery();
+
+        #endregion download content
+        */
     }
 
-
+    #region contact
     public class Phone
     {
         public string Number { get; set; }
@@ -94,9 +119,6 @@ namespace DataStreaming
 
         [DataMember]
         public string DisplayName { get; set; }
-
-        [DataMember]
-        public string Token { get; set; }
 
         [DataMember]
         public string TypeOfContent { get; set; }
@@ -169,7 +191,7 @@ namespace DataStreaming
         }
     }
 
-    
+#endregion contact
 
 
 }

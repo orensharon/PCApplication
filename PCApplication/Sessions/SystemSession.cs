@@ -1,11 +1,10 @@
-﻿using PCApplication.Sessions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCApplication.AccountSession
+namespace PCApplication.Sessions
 {
     public class SystemSession
     {
@@ -44,31 +43,15 @@ namespace PCApplication.AccountSession
             // From a given remote ip address - store it in the system
             // It may be empty - this means there is no ip available
 
-            PCApplication.Properties.Settings.Default.PCIP = ipAddress;
+            PCApplication.Properties.Settings.Default.SafeIP = ipAddress;
             PCApplication.Properties.Settings.Default.Save();
         }
 
         public string getIPAddress()
         {
 
-            return Convert.ToString(PCApplication.Properties.Settings.Default.PCIP);
+            return Convert.ToString(PCApplication.Properties.Settings.Default.SafeIP);
         }
-
-
-        /*public void setUserID(int user_id)
-        {
-
-            // From a given user id - store it in the system
-
-            PCApplication.Properties.Settings.Default.UserID = user_id;
-            PCApplication.Properties.Settings.Default.Save();
-        }
-
-        public int getUserID()
-        {
-
-            return Convert.ToInt32(PCApplication.Properties.Settings.Default.UserID);
-        }*/
 
 
         public void setUserToken(string token)
@@ -83,6 +66,53 @@ namespace PCApplication.AccountSession
 
             return PCApplication.Properties.Settings.Default.Token;
         }
+
+
+
+
+        #region general tab
+        /*
+         * Username setter and getter
+         */
+        public void setUserName(string username)
+        {
+            PCApplication.Properties.Settings.Default.Username = username;
+            PCApplication.Properties.Settings.Default.Save();
+        }
+
+        public string getUserName()
+        {
+            return Convert.ToString(PCApplication.Properties.Settings.Default.Username);
+        }
+
+
+
+        /*
+         * Password setter and getter
+         */
+        public void setPassword(string password)
+        {
+            PCApplication.Properties.Settings.Default.Password = password;
+            PCApplication.Properties.Settings.Default.Save();
+        }
+
+        public string getPassword()
+        {
+            return Convert.ToString(PCApplication.Properties.Settings.Default.Password);
+        }
+
+        public void setServerState(bool state)
+        {
+            PCApplication.Properties.Settings.Default.IsServerRunning = state;
+            PCApplication.Properties.Settings.Default.Save();
+        }
+
+        public bool getServerState()
+        {
+            return Convert.ToBoolean(PCApplication.Properties.Settings.Default.IsServerRunning);
+        }
+
+        #endregion general tab
 
     }
 }

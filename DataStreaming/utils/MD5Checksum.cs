@@ -64,7 +64,7 @@ namespace DataStreaming.utils
                     sb.Append(retVal[i].ToString("x2"));
                 }
 
-                return sb.ToString();
+                return sb.ToString().ToUpper();
             }
             else
             {
