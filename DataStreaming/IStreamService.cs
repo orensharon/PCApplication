@@ -23,8 +23,8 @@ namespace DataStreaming
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare,
-            UriTemplate = "/Upload")]
-        string Upload(Stream stream);
+            UriTemplate = "/Upload/Photo")]
+        string UploadPhoto(Stream stream);
 
 
         [OperationContract]
@@ -65,6 +65,11 @@ namespace DataStreaming
     {
         public string Number { get; set; }
         public string Type { get; set; }
+
+        public override string ToString()
+        {
+            return "[" + Number + "," + Type + "]";
+        }
     }
 
 
@@ -72,6 +77,11 @@ namespace DataStreaming
     {
         public string Type { get; set; }
         public string Address { get; set; }
+
+        public override string ToString()
+        {
+            return "[" + Type + "," + Address + "]";
+        }
     }
 
 
@@ -79,25 +89,40 @@ namespace DataStreaming
     {
         public string Type { get; set; }
         public string Address { get; set; }
+
+        public override string ToString()
+        {
+            return "[" + Type + "," + Address + "]";
+        }
     }
 
     public class Organization
     {
         public string Company { get; set; }
         public string Title { get; set; }
+
+        public override string ToString() 
+        {
+            return "[" + Company + "," + Title + "]";
+        }
     }
 
     public class InstantMenssenger
     {
         public string Name { get; set; }
         public string Type { get; set; }
+
+        public override string ToString()
+        {
+            return "[" + Name + "," + Type + "]";
+        }
     }
 
     [DataContract]
     public class ContactRequest
     {
         [DataMember]
-        public string Notes { get; set; }
+        public string Notes { get; set;  }
 
         [DataMember]
         public List<Phone> Phones { get; set; }
@@ -178,7 +203,7 @@ namespace DataStreaming
             }
 
             // Creating XML Entry for the new contact
-            doc = new XElement(new XElement("Contact", new XAttribute("ID", ID),
+            doc = new XElement(new XElement("DBContact", new XAttribute("ID", ID),
                                 new XElement("DisplayName",DisplayName),
                                 phones, emails, addresses, InstantMessengers,
                                 new XElement("PhotoURI",PhotoURI),

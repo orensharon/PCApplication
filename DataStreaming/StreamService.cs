@@ -1,4 +1,4 @@
-﻿
+﻿using DataStreaming.db;
 using HttpMultipartParser;
 using System;
 using System.Collections.Generic;
@@ -31,9 +31,9 @@ namespace DataStreaming
 
         #region upload content
 
-        
 
-        public string Upload(Stream stream)
+
+        public string UploadPhoto(Stream stream)
         {
             string hashedFileContent = "";
             string localPath;
@@ -44,6 +44,7 @@ namespace DataStreaming
             // with the HTTP request. We can do that in WCF using the WebOperationConext:
             var type = WebOperationContext.Current.IncomingRequest.Headers["Content-Type"];
             var realContentHash = WebOperationContext.Current.IncomingRequest.Headers["Content-MD5"];
+            var token = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
 
             // Now we want to strip the boundary out of the Content-Type, currently the string
             // looks like: "multipart/form-data; boundary=---------------------124123qase124"
@@ -53,7 +54,8 @@ namespace DataStreaming
             var parser = new MultipartFormDataParser(stream, boundary, Encoding.UTF8);
 
             // Get the parameters from the request body
-            string token = parser.Parameters["Token"].Data;
+            string id = parser.Parameters["Id"].Data;
+            //string token = parser.Parameters["Token"].Data;
             string typeOfContent = parser.Parameters["TypeOfContent"].Data;
 
 
@@ -91,7 +93,10 @@ namespace DataStreaming
                 {
                     SavePhoto(localPath, file, img);
                     UpdateHtml();
-                }  
+                }
+
+                StoredContentBL bl = new StoredContentBL();
+               // bl.StorePhoto(id, file.Name);
             }
 
             return hashedFileContent;
@@ -273,7 +278,8 @@ namespace DataStreaming
                     return null;
                 }
 
-                //Console.WriteLine(OperationContext.Current.RequestContext.RequestMessage.ToString() + ", " + hashedFileContent);
+                StoredContentBL bl = new StoredContentBL();
+                //bl.StoreContact(request);
 
                 HandleSaveContact(request);
                 return realContentHash;
@@ -399,7 +405,7 @@ namespace DataStreaming
 
 
             // Search for existing contact before appending
-            var query = from c in contacts.Descendants("Contact")
+            var query = from c in contacts.Descendants("DBContact")
                         where ((c.Attribute("ID").Value.Trim().Equals(request.ID)))
                         select c;
 
@@ -419,7 +425,7 @@ namespace DataStreaming
                 itemElement.ReplaceWith(request.toXml());
                    
                 /*contacts.Element("Contacts")
-                      .Elements("Contact")
+                      .Elements("DBContact")
                       .Where(x => (string)x.Attribute("ID") == (string)itemElement.Attribute("ID"))
                       .Remove();*/
 

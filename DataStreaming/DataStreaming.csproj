@@ -70,7 +70,10 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="db\StoredContentBL.cs" />
+    <Compile Include="db\StoredContentDAL.cs" />
     <Compile Include="IStreamService.cs" />
+    <Compile Include="utils\Helper.cs" />
     <Compile Include="utils\JWTManager.cs" />
     <Compile Include="multipart-parser\BinaryStreamStack.cs" />
     <Compile Include="multipart-parser\FilePart.cs" />
