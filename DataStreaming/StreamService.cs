@@ -1,4 +1,6 @@
-﻿using DataStreaming.db;
+﻿
+using DatabaseLinker;
+using DataStreaming.db;
 using HttpMultipartParser;
 using System;
 using System.Collections.Generic;
@@ -282,6 +284,17 @@ namespace DataStreaming
                 //bl.StoreContact(request);
 
                 HandleSaveContact(request);
+                /*
+                Contact contact = new Contact();
+                contact.Id = Int32.Parse(request.Id);
+                contact.DisplayName = request.DisplayName;
+                contact.PhotoURI = request.PhotoURI;
+
+                
+                ContentContext db = new ContentContext();
+                db.Contacts.Add(contact);
+                db.SaveChanges();
+                */
                 return realContentHash;
             }
 
@@ -406,7 +419,7 @@ namespace DataStreaming
 
             // Search for existing contact before appending
             var query = from c in contacts.Descendants("DBContact")
-                        where ((c.Attribute("ID").Value.Trim().Equals(request.ID)))
+                        where ((c.Attribute("Id").Value.Trim().Equals(request.Id)))
                         select c;
 
             if (query.Count() == 0)
@@ -414,7 +427,7 @@ namespace DataStreaming
                 // Means contact dosent exist
 
                 // Append new content to xml
-                contacts.Descendants("Contacts").FirstOrDefault().Add(request.toXml());
+                //contacts.Descendants("Contacts").FirstOrDefault().Add(request.toXml());
                 contacts.Save(localPath + "contacts.xml");
             }
             else
@@ -422,7 +435,7 @@ namespace DataStreaming
                 // Means contact should be exists
                 XElement itemElement = query.FirstOrDefault();
 
-                itemElement.ReplaceWith(request.toXml());
+               // itemElement.ReplaceWith(request.toXml());
                    
                 /*contacts.Element("Contacts")
                       .Elements("DBContact")

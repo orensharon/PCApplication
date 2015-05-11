@@ -14,7 +14,7 @@ namespace DataStreaming.db
 
         public void StoreContact(ContactRequest request)
         {
-
+            /*
             string sqlString;
             string result;
 
@@ -27,7 +27,7 @@ namespace DataStreaming.db
                 con.Open();
                 // Execute query
                 SqlCommand com = new SqlCommand(sqlString, con);
-                com.Parameters.AddWithValue("@user_id", request.ID);
+                com.Parameters.AddWithValue("@user_id", request.Id);
 
                 int UserExist = (int)com.ExecuteScalar();
                 string query;
@@ -60,7 +60,7 @@ namespace DataStreaming.db
                 var instantMessengers = String.Join<InstantMenssenger>(", ", request.InstantMessengers.ToArray());
 
                 SqlCommand com1 = new SqlCommand(query, con);
-                com1.Parameters.AddWithValue("@id", request.ID);
+                com1.Parameters.AddWithValue("@id", request.Id);
                 com1.Parameters.AddWithValue("@name", request.DisplayName);
                 com1.Parameters.AddWithValue("@phones", phones);
                 com1.Parameters.AddWithValue("@emails", emails);
@@ -71,7 +71,7 @@ namespace DataStreaming.db
                 com1.Parameters.AddWithValue("@notes", request.Notes);
 
                 com1.ExecuteNonQuery();
-            }
+            }*/
         }
 
         public void StorePhoto(string id, string filename)
@@ -143,7 +143,7 @@ namespace DataStreaming.db
                     if (reader.Read())
                     {
                         result = new ContactRequest();
-                        result.ID = reader.GetString(0);
+                        result.Id = reader.GetString(0);
                         result.DisplayName = reader.GetString(1);
                     }
                     reader.Close();

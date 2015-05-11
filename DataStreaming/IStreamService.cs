@@ -65,11 +65,6 @@ namespace DataStreaming
     {
         public string Number { get; set; }
         public string Type { get; set; }
-
-        public override string ToString()
-        {
-            return "[" + Number + "," + Type + "]";
-        }
     }
 
 
@@ -78,10 +73,6 @@ namespace DataStreaming
         public string Type { get; set; }
         public string Address { get; set; }
 
-        public override string ToString()
-        {
-            return "[" + Type + "," + Address + "]";
-        }
     }
 
 
@@ -90,10 +81,6 @@ namespace DataStreaming
         public string Type { get; set; }
         public string Address { get; set; }
 
-        public override string ToString()
-        {
-            return "[" + Type + "," + Address + "]";
-        }
     }
 
     public class Organization
@@ -101,10 +88,6 @@ namespace DataStreaming
         public string Company { get; set; }
         public string Title { get; set; }
 
-        public override string ToString() 
-        {
-            return "[" + Company + "," + Title + "]";
-        }
     }
 
     public class InstantMenssenger
@@ -112,10 +95,6 @@ namespace DataStreaming
         public string Name { get; set; }
         public string Type { get; set; }
 
-        public override string ToString()
-        {
-            return "[" + Name + "," + Type + "]";
-        }
     }
 
     [DataContract]
@@ -137,7 +116,7 @@ namespace DataStreaming
         public List<LivingAddress> Addresses { get; set; }
 
         [DataMember]
-        public string ID { get; set; }
+        public string Id { get; set; }
 
         [DataMember]
         public Organization Organization { get; set; }
@@ -151,7 +130,7 @@ namespace DataStreaming
         [DataMember]
         public List<InstantMenssenger> InstantMessengers { get; set; }
 
-        public XElement toXml()
+       /* public XElement toXml()
         {
 
 
@@ -203,7 +182,7 @@ namespace DataStreaming
             }
 
             // Creating XML Entry for the new contact
-            doc = new XElement(new XElement("DBContact", new XAttribute("ID", ID),
+            doc = new XElement(new XElement("DBContact", new XAttribute("Id", Id),
                                 new XElement("DisplayName",DisplayName),
                                 phones, emails, addresses, InstantMessengers,
                                 new XElement("PhotoURI",PhotoURI),
@@ -213,7 +192,7 @@ namespace DataStreaming
 
             Console.WriteLine(doc.ToString());
             return doc;
-        }
+        }*/
     }
 
 #endregion contact
