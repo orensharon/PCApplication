@@ -28,14 +28,16 @@ namespace DataStreaming
 
         static string STORAGE_MAIM_PATH = Application.StartupPath + @"\AppData\Contents\";
 
-        // TODO: constant (names from android)
+
+        private static readonly DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        public static long CurrentTimeMillis()
+        {
+            return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
+        }
 
 
-        #region upload content
-
-
-
-        public string UploadPhoto(Stream stream)
+        public string InserPhoto(Stream stream)
         {
             string hashedFileContent = "";
             string localPath;
@@ -56,10 +58,11 @@ namespace DataStreaming
             var parser = new MultipartFormDataParser(stream, boundary, Encoding.UTF8);
 
             // Get the parameters from the request body
-            string id = parser.Parameters["Id"].Data;
+            string ex_Id = parser.Parameters["Id"].Data;
             //string token = parser.Parameters["Token"].Data;
             string typeOfContent = parser.Parameters["TypeOfContent"].Data;
 
+            int photoId;
 
             // Decode the user id from the token
             var payLoad = JWTManager.DecodeToken(token) as IDictionary<string, object>;
@@ -72,6 +75,13 @@ namespace DataStreaming
                 return null;
             }
 
+
+            if (!Int32.TryParse(ex_Id, out photoId))
+            {
+                // Error getting the id of the content
+                SetResponseHttpStatus(HttpStatusCode.BadRequest);
+                return null;
+            }
 
             localPath = CreateContentDirectory(typeOfContent);
             
@@ -94,58 +104,407 @@ namespace DataStreaming
                 using (Image img = Image.FromStream(file.Data))
                 {
                     SavePhoto(localPath, file, img);
-                    UpdateHtml();
                 }
 
-                StoredContentBL bl = new StoredContentBL();
-               // bl.StorePhoto(id, file.Name);
+                using (ContentContext db = new ContentContext())
+                {
+
+                    // Make sure contact doesnt exist
+                    if (db.Photos.FirstOrDefault(c => c.Id == photoId) == null)
+                    {
+                        Photo photo = new Photo();
+                        photo.Id = photoId;
+                        photo.FileName = file.FileName;
+                        photo.DataCreated = CurrentTimeMillis();
+                        photo.LastModified = photo.DataCreated;
+                        db.Photos.Add(photo);
+                        db.SaveChanges();
+                    }
+                }
+               
+
             }
 
             return hashedFileContent;
 
         }
 
-        private void UpdateHtml()
+        public List<PhotoResponse> GetListOfPhotos()
         {
-            // Update the html file
-            // TODO: Check if need  to update according the date, check what the last time new content arrived and the last time updated
 
-            if (needToUpdateHtml())
+            var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
+            // Decode the user id from the token
+            var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
+
+            // Authenticate the request
+            if (payLoad == null)
             {
-                string html = "";
-                using (StreamReader sr = new StreamReader(STORAGE_MAIM_PATH + "lib/PhotoGallery/core/gallery.html"))
+                // Authentication error
+                //SetResponseHttpStatus(HttpStatusCode.Forbidden);
+                //return null;
+            }
+
+
+            List<PhotoResponse> result = new List<PhotoResponse>();
+
+            // Get all ids of photos from data base
+            using (ContentContext db = new ContentContext())
+            {
+                var photos = (from p
+                                 in db.Photos
+                                select p);
+                if (photos != null)
                 {
-                    html = sr.ReadToEnd();
-                }
-
-                // Getting all images in the photos folder
-                DirectoryInfo dir = new DirectoryInfo(STORAGE_MAIM_PATH + "Photo");
-                FileInfo[] images = dir.GetFiles("*.jpg");
-                string body = "";
-
-                var rimages = images.Reverse();
-
-                // For each image in folder create jquery row
-                foreach (FileInfo image in rimages)
-                {
-                    if (!image.Name.StartsWith("small_") && !image.Name.StartsWith("medium_"))
+                    result = photos.Select(response => new PhotoResponse()
                     {
-                        body += "{image : '../../Photo/" + image.Name + "', title : 'Image Credit: Maria Kazvan', thumb : '../../Photo/" + image.Name + "', url : ''},\n";
-                    }
-
-                }
-                body = body.Substring(0, body.Length - 2);
-                html = html.Replace("<!--###CONTENT###-->", body);
-                using (System.IO.StreamWriter htmlFile = new System.IO.StreamWriter(STORAGE_MAIM_PATH + "lib\\PhotoGallery\\index.html"))
-                {
-                    htmlFile.Write(html);
+                        Id = response.Id.ToString(),
+                        DateCreated = response.DataCreated,
+                        LastModified = response.LastModified
+                    }).ToList();
                 }
             }
+
+            return result;
         }
-        private bool needToUpdateHtml()
+
+        public Stream GetPhoto(string id)
         {
-            return true;
+            string filename;
+            string downloadFilePath = "";
+            int photoId;
+
+            downloadFilePath = STORAGE_MAIM_PATH + @"Photo";
+
+             var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
+            // Decode the user id from the token
+            var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
+
+            // Authenticate the request
+            if (payLoad == null)
+            {
+                // Authentication error
+                SetResponseHttpStatus(HttpStatusCode.Forbidden);
+                return null;
+            }
+
+            if (!Int32.TryParse(id, out photoId))
+            {
+                // Error getting the id of the content
+                //SetResponseHttpStatus(HttpStatusCode.BadRequest);
+                //return null;
+            }
+
+            WebOperationContext.Current.OutgoingResponse.ContentType = "image/jpg";
+
+            // Get all ids of photos from data base
+            using (ContentContext db = new ContentContext())
+            {
+                Photo photo = db.Photos.FirstOrDefault(p => p.Id == photoId);
+                if (photo != null)
+                {
+                    filename = photo.FileName;
+                }
+                else
+                {
+                    // Cant fint image
+                    SetResponseHttpStatus(HttpStatusCode.BadRequest);
+                    return null;
+                }
+
+            }
+
+            Console.WriteLine("get photo: " + id);
+
+
+            FileStream f = new FileStream(downloadFilePath + "\\small_" + filename, FileMode.Open);
+            int length = (int)f.Length;
+            WebOperationContext.Current.OutgoingResponse.ContentLength = length;
+            byte[] buffer = new byte[length];
+            int sum = 0;
+            int count;
+            while ((count = f.Read(buffer, sum, length - sum)) > 0)
+            {
+                sum += count;
+            }
+            f.Close();
+            return new MemoryStream(buffer);
         }
+
+
+
+
+        public string InsertContact(ContactRequest request)
+        {
+            var realContentHash = WebOperationContext.Current.IncomingRequest.Headers["Content-MD5"];
+            var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
+            int contactId;
+
+            // Decode the user id from the token
+            var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
+
+            // Authenticate the request
+            if (payLoad == null)
+            {
+                // Authentication error
+                SetResponseHttpStatus(HttpStatusCode.Forbidden);
+                return null;
+            }
+
+            if (!Int32.TryParse(request.Id, out contactId))
+            {
+                // Error getting the id of the content
+                SetResponseHttpStatus(HttpStatusCode.BadRequest);
+                return null;
+            }
+
+            if (request != null)
+            {
+
+                // TODO: MD5 hash check
+
+                // Creating hash from request body
+                string contentHash = realContentHash; //utils.MD5Checksum.StringMD5Hash(tempMD5);
+
+                // Checking if the hashes are equal
+                if (!contentHash.Equals(realContentHash))
+                {
+                    // Means there is a problem
+                    SetResponseHttpStatus(HttpStatusCode.Conflict);
+                    return null;
+                }
+
+                // Add contact to database
+                using (ContentContext db = new ContentContext())
+                {
+
+                    // Make sure contact doesnt exist
+                    if (db.Contacts.FirstOrDefault(c => c.Id == contactId) == null)
+                    {
+                        Contact contact = new Contact();
+                        contact.Id = contactId;
+                        contact.DisplayName = request.DisplayName;
+                        contact.Notes = request.Notes;
+                        contact.DateCreated = CurrentTimeMillis();
+                        contact.LastModified = contact.DateCreated;
+
+                        DatabaseLinker.Organization org = new DatabaseLinker.Organization();
+                        org.Company = request.Organization.Company;
+                        org.Title = request.Organization.Title;
+                        contact.Organization = org;
+
+                        request.Addresses.ForEach(n => contact.AddAddress(n.Address, n.Type));
+                        request.Phones.ForEach(n => contact.AddPhone(n.Number, n.Type));
+                        request.Emails.ForEach(n => contact.AddEmail(n.Address, n.Type));
+                        request.InstantMessengers.ForEach(n => contact.AddInstantMessenger(n.Name, n.Type));
+
+
+                        db.Contacts.Add(contact);
+                        db.SaveChanges();
+
+                        SetResponseHttpStatus(HttpStatusCode.Accepted);
+                    }
+                }
+                return realContentHash;
+            }
+
+            SetResponseHttpStatus(HttpStatusCode.BadRequest);
+            return null;
+        }
+
+        public string UpdateContact(ContactRequest request)
+        {
+            var realContentHash = WebOperationContext.Current.IncomingRequest.Headers["Content-MD5"];
+            var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
+            int contactId;
+
+            if (request != null && Int32.TryParse(request.Id, out contactId))
+            {
+
+
+                // Decode the user id from the token
+                var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
+
+                // Authenticate the request
+                if (payLoad == null)
+                {
+                    // Authentication error
+                    SetResponseHttpStatus(HttpStatusCode.Forbidden);
+                    return null;
+                }
+
+                // TODO: MD5 hash check
+
+                // Creating hash from request body
+                string contentHash = realContentHash; //utils.MD5Checksum.StringMD5Hash(tempMD5);
+
+                // Checking if the hashes are equal
+                if (!contentHash.Equals(realContentHash))
+                {
+                    // Means there is a problem
+                    SetResponseHttpStatus(HttpStatusCode.Conflict);
+                    return null;
+                }
+
+                // Add contact to database
+                using (ContentContext db = new ContentContext())
+                {
+
+                    // Make sure contact exist
+                    Contact contact = db.Contacts.FirstOrDefault(c => c.Id == contactId);
+                    if (contact != null)
+                    {
+                        // Update the contact
+                        contact.DisplayName = request.DisplayName;
+                        contact.Notes = request.Notes;
+                        contact.LastModified = CurrentTimeMillis();
+
+                        DatabaseLinker.Organization organization = contact.Organization;
+                        if (organization == null)
+                        {
+                            // No previuos info about organization exist
+                            organization = new DatabaseLinker.Organization();
+                            organization.Company = request.Organization.Company;
+                            organization.Title = request.Organization.Title;
+                            contact.Organization = organization;
+                        }
+                        else
+                        {
+                            if (request.Organization.Title == null && request.Organization.Company == null)
+                            {
+                                // The user delete the organization info
+                                db.Organizations.Remove(contact.Organization);
+
+                            }
+                            else
+                            {
+                                // Simple edit the exist organization
+                                organization.Company = request.Organization.Company;
+                                organization.Title = request.Organization.Title;   
+                            }
+                        }
+
+                        db.Phones.RemoveRange(contact.Phones);
+                        db.Emails.RemoveRange(contact.Emails);
+                        db.Addresses.RemoveRange(contact.Addresses);
+                        db.InstantMenssengers.RemoveRange(contact.InstantMenssengers);
+
+                        request.Addresses.ForEach(n => contact.AddAddress(n.Address, n.Type));
+                        request.Phones.ForEach(n => contact.AddPhone(n.Number, n.Type));
+                        request.Emails.ForEach(n => contact.AddEmail(n.Address, n.Type));
+                        request.InstantMessengers.ForEach(n => contact.AddInstantMessenger(n.Name, n.Type));
+
+                        db.SaveChanges();
+
+                        SetResponseHttpStatus(HttpStatusCode.Accepted);
+
+                        
+                    }
+                }
+
+                return realContentHash;
+            }
+
+            SetResponseHttpStatus(HttpStatusCode.InternalServerError);
+            return null;
+        }
+
+        public List<ContactRequest> GetContacts() 
+        {
+            List<ContactRequest> result;
+
+
+            var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
+            // Decode the user id from the token
+            var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
+
+            // Authenticate the request
+            if (payLoad == null)
+            {
+                // Authentication error
+                SetResponseHttpStatus(HttpStatusCode.Forbidden);
+                return null;
+            }
+
+            // Get all ids of contatcs from data base
+            result = new List<ContactRequest>();
+            using (ContentContext db = new ContentContext())
+            {
+                var contacts = (from c
+                                 in db.Contacts
+                                select c).ToList();
+                foreach (Contact contact in contacts)
+                {
+                    // Create request contact from entity contact
+
+                    ContactRequest item = new ContactRequest();
+                    item.Id = contact.Id.ToString();
+                    item.DisplayName = contact.DisplayName;
+                    item.Notes = contact.Notes;
+                    item.PhotoURI = "todo";
+                    item.TypeOfContent = "Contact";
+                    item.Phones = contact.Phones.Select(p => new Phone()
+                    {
+                            Number = p.Number ,
+                            Type = p.Type.ToString() }).ToList();
+
+                    item.Emails = contact.Emails.Select(e => new Email()
+                    {
+                        Address = e.Address,
+                        Type = e.Type.ToString()
+                    }).ToList();
+
+                    item.Addresses = contact.Addresses.Select(a => new LivingAddress()
+                    {
+                        Address = a.LivingAddress,
+                        Type = a.Type.ToString()
+                    }).ToList();
+
+                    item.InstantMessengers = contact.InstantMenssengers.Select(im => new InstantMenssenger()
+                    {
+                        Name = im.Name,
+                        Type = im.Type.ToString()
+                    }).ToList();
+
+                    if (item.Organization != null)
+                    {
+                        item.Organization.Company = contact.Organization.Company;
+                        item.Organization.Title = contact.Organization.Title;
+                    }
+
+                    result.Add(item);
+                }
+
+            }
+            return result;
+        }
+
+
+
+
+        // Private functions
+
+        private void SetResponseHttpStatus(HttpStatusCode statusCode)
+        {
+            var context = WebOperationContext.Current;
+            context.OutgoingResponse.StatusCode = statusCode;
+        }
+
+        private string CreateContentDirectory(string typeOfContent)
+        {
+            string localPath;
+            // Set the path where so save the specific content from the given typeOfContent
+            localPath = STORAGE_MAIM_PATH + typeOfContent + "\\";
+            // Determine whether the directory exists according to the typeOfContent args
+            if (!Directory.Exists(localPath + typeOfContent))
+            {
+
+                // Try to create the directory.
+                DirectoryInfo di = Directory.CreateDirectory(localPath);
+
+            }
+            return localPath;
+        }
+
 
 
         private void SavePhoto(string localPath, FilePart file, Image img)
@@ -194,12 +553,12 @@ namespace DataStreaming
                 System.Drawing.Imaging.Encoder.Quality;
 
             EncoderParameters myEncoderParameters = new EncoderParameters(1);
-  
+
             EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 100L);
             myEncoderParameters.Param[0] = myEncoderParameter;
             img.Save(localPath + file.FileName, jpgEncoder, myEncoderParameters);
 
-            CreateThumbnail(200, localPath, file.FileName, img);
+            CreateThumbnail(400, localPath, file.FileName, img);
         }
         private ImageCodecInfo GetEncoder(ImageFormat format)
         {
@@ -218,7 +577,7 @@ namespace DataStreaming
         private static void CreateThumbnail(int width, string localPath, string fileName, Image image)
         {
             // Making thumbmail images
-            
+
             float imgWidth = image.PhysicalDimension.Width;
             float imgHeight = image.PhysicalDimension.Height;
             float imgSize = imgHeight > imgWidth ? imgHeight : imgWidth;
@@ -228,7 +587,7 @@ namespace DataStreaming
             using (System.Drawing.Image thumb = image.GetThumbnailImage((int)imgWidth, (int)imgHeight, delegate() { return false; }, (IntPtr)0))
             {
                 string prefix;
-                if (width == 200)
+                if (width == 400)
                 {
                     prefix = "small";
                 }
@@ -240,237 +599,13 @@ namespace DataStreaming
             }
 
 
-            
+
         }
         private bool ThumbnailCallback()
         {
             throw new NotImplementedException();
         }
 
-
-        public string UploadContact(ContactRequest request)
-        {
-            var realContentHash = WebOperationContext.Current.IncomingRequest.Headers["Content-MD5"];
-            var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
-            if (request != null)
-            {
-                
-
-                // Decode the user id from the token
-                var payLoad = JWTManager.DecodeToken(authToken) as IDictionary<string, object>;
-
-                // Authenticate the request
-                if (payLoad == null)
-                {
-                    // Authentication error
-                    SetResponseHttpStatus(HttpStatusCode.Forbidden);
-                    return null;
-                }
-
-                // TODO: MD5 hash check
-
-                // Creating hash from request body
-                string contentHash = realContentHash; //utils.MD5Checksum.StringMD5Hash(tempMD5);
-
-                // Checking if the hashes are equal
-                if (!contentHash.Equals(realContentHash))
-                {
-                    // Means there is a problem
-                    SetResponseHttpStatus(HttpStatusCode.Conflict);
-                    return null;
-                }
-
-                StoredContentBL bl = new StoredContentBL();
-                //bl.StoreContact(request);
-
-                HandleSaveContact(request);
-                /*
-                Contact contact = new Contact();
-                contact.Id = Int32.Parse(request.Id);
-                contact.DisplayName = request.DisplayName;
-                contact.PhotoURI = request.PhotoURI;
-
-                
-                ContentContext db = new ContentContext();
-                db.Contacts.Add(contact);
-                db.SaveChanges();
-                */
-                return realContentHash;
-            }
-
-            SetResponseHttpStatus(HttpStatusCode.InternalServerError);
-            return null;
-        }
-        
-
-
-        #endregion upload content
-
-
-
-        /*
-        #region download content
-
-
-
-        public Stream Download(string context, string fileName)
-        {
-            string downloadFilePath = "";
-
-            if (context.Equals("internal"))
-            {
-                WebOperationContext.Current.OutgoingResponse.ContentType = "image/png";
-                downloadFilePath = STORAGE_MAIM_PATH + @"lib/img";
-
-            } else if (context.Equals("external")) {
-                downloadFilePath = STORAGE_MAIM_PATH + @"Photo";
-                
-                WebOperationContext.Current.OutgoingResponse.ContentType = "image/jpg";
-            }
-
-           
-            FileStream f = new FileStream(downloadFilePath + "\\" + fileName, FileMode.Open);
-            int length = (int)f.Length;
-            WebOperationContext.Current.OutgoingResponse.ContentLength = length;
-            byte[] buffer = new byte[length];
-            int sum = 0;
-            int count;
-            while ((count = f.Read(buffer, sum, length - sum)) > 0)
-            {
-                sum += count;
-            }
-            f.Close();
-            return new MemoryStream(buffer); 
-        }
-
-        public Stream getGallery()
-        {
-
-
-            string html = File.ReadAllText(STORAGE_MAIM_PATH + "lib/gallery.html");
-            
-           
-            
-            // Getting all images in the photos folder
-            DirectoryInfo dir = new DirectoryInfo(STORAGE_MAIM_PATH + "Photo");
-            FileInfo[] images = dir.GetFiles("*.jpg");
-            string body = "";
-
-            var rimages = images.Reverse();
-
-            // For each image in folder create jquery row
-            foreach (FileInfo image in rimages)
-            {
-                if (!image.Name.StartsWith("small_")) {
-                    body += @"{image : '../Download/external/" + image.Name + 
-                            @"', title : 'Image Credit: Maria Kazvan', thumb : '../Download/external/" + image.Name + 
-                            @"', url : '../Download/" + image.Name + @"'},";
-                }
-                
-            }
-            // pushing the image rows
-            body = body.Substring(0, body.Length - 1);
-            html = html.Replace("###CONTENT###", body);
-           
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-            int length = (int)html.Length;
-            WebOperationContext.Current.OutgoingResponse.ContentLength = length;
-            
-            byte[] byteArray = Encoding.ASCII.GetBytes(html);
-      
-
-            return new MemoryStream(byteArray); 
-        }
-
-        
-        
-        #endregion download content
-
-        */
-
-
-        // Private functions
-
-        private void SetResponseHttpStatus(HttpStatusCode statusCode)
-        {
-            var context = WebOperationContext.Current;
-            context.OutgoingResponse.StatusCode = statusCode;
-        }
-
-        private void HandleSaveContact(ContactRequest request)
-        {
-
-            XDocument contacts;
-            string localPath;
-
-            localPath = CreateContentDirectory(request.TypeOfContent);
-
-            // Open existing xml file (if exist)
-            try
-            {
-                contacts = XDocument.Load(localPath + "contacts.xml");
-            }
-            catch
-            {
-                contacts = new XDocument();
-                contacts.Add(new XElement("Contacts"));
-            }
-
-
-            // Search for existing contact before appending
-            var query = from c in contacts.Descendants("DBContact")
-                        where ((c.Attribute("Id").Value.Trim().Equals(request.Id)))
-                        select c;
-
-            if (query.Count() == 0)
-            {
-                // Means contact dosent exist
-
-                // Append new content to xml
-                //contacts.Descendants("Contacts").FirstOrDefault().Add(request.toXml());
-                contacts.Save(localPath + "contacts.xml");
-            }
-            else
-            {
-                // Means contact should be exists
-                XElement itemElement = query.FirstOrDefault();
-
-               // itemElement.ReplaceWith(request.toXml());
-                   
-                /*contacts.Element("Contacts")
-                      .Elements("DBContact")
-                      .Where(x => (string)x.Attribute("ID") == (string)itemElement.Attribute("ID"))
-                      .Remove();*/
-
-                contacts.Save(localPath + "contacts.xml");
-                    
-                    //itemElement.ReplaceWith(request.toXml());
-
-                    
-                
-
-                contacts.Save(localPath + "contacts.xml");
-                
-
-            }
-           
-        }
-
-        private string CreateContentDirectory(string typeOfContent)
-        {
-            string localPath;
-            // Set the path where so save the specific content from the given typeOfContent
-            localPath = STORAGE_MAIM_PATH + typeOfContent + "\\";
-            // Determine whether the directory exists according to the typeOfContent args
-            if (!Directory.Exists(localPath + typeOfContent))
-            {
-
-                // Try to create the directory.
-                DirectoryInfo di = Directory.CreateDirectory(localPath);
-
-            }
-            return localPath;
-        }
 
     }
 }

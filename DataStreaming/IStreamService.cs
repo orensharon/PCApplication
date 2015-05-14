@@ -23,8 +23,27 @@ namespace DataStreaming
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare,
-            UriTemplate = "/Upload/Photo")]
-        string UploadPhoto(Stream stream);
+            UriTemplate = "/Photo/Insert")]
+        string InserPhoto(Stream stream);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Wrapped,
+            UriTemplate = "/Photo/Get")]
+        List<PhotoResponse> GetListOfPhotos();
+
+        [OperationContract]
+        [WebGet(
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare,
+            UriTemplate = "/Photo/Get/{id}")]
+        Stream GetPhoto(string id);
+
+
+
 
 
         [OperationContract]
@@ -32,33 +51,49 @@ namespace DataStreaming
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare,
-            UriTemplate = "/Upload/Contact")]
-        string UploadContact(ContactRequest request);
+            UriTemplate = "/Contact/Insert")]
+        string InsertContact(ContactRequest request);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare,
+            UriTemplate = "/Contact/Update")]
+        string UpdateContact(ContactRequest request);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST",
+            RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare,
+            UriTemplate = "/Contact/Get")]
+        List<ContactRequest> GetContacts();
 
         #endregion upload content
        
-        /*
-        #region download content
-
-        [OperationContract]
-        [WebGet(
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Bare,
-            UriTemplate = "/Download/{context}/{fileName}")]
-        Stream Download(string context, string fileName);
-
-        [OperationContract]
-        [WebGet(
-            RequestFormat = WebMessageFormat.Json,
-            ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Bare,
-            UriTemplate = "/Gallery/")]
-        Stream getGallery();
-
-        #endregion download content
-        */
+       
     }
+
+
+    #region photo
+
+    [DataContract]
+    public class PhotoResponse
+    {
+        [DataMember]
+        public string Id { get; set; }
+
+        [DataMember]
+        public long DateCreated { get; set; }
+
+        [DataMember]
+        public long LastModified { get; set; }
+
+    }
+
+
+    #endregion photo
 
     #region contact
     public class Phone
@@ -130,69 +165,6 @@ namespace DataStreaming
         [DataMember]
         public List<InstantMenssenger> InstantMessengers { get; set; }
 
-       /* public XElement toXml()
-        {
-
-
-            XElement doc;
-
-           
-            // Phones
-            XElement phones = new XElement("Phones");
-            foreach (Phone phone in Phones)
-            {
-                phones.Add(
-                    new XElement("Phone", 
-                    new XAttribute("Number", phone.Number),
-                    new XAttribute("Type", phone.Type))
-                );
-            }
-
-            // Emails
-            XElement emails = new XElement("Emails");
-            foreach (Email email in Emails)
-            {
-                emails.Add(
-                    new XElement("Email",
-                    new XAttribute("Address", email.Address),
-                    new XAttribute("Type", email.Type))
-                );
-            }
-
-            // Addresses
-            XElement addresses = new XElement("Addresses");
-            foreach (LivingAddress address in Addresses)
-            {
-                addresses.Add(
-                    new XElement("Address",
-                    new XAttribute("Address", address.Address),
-                    new XAttribute("Type", address.Type))
-                );
-            }
-            
-            // Instant Messengers
-            XElement instantMessengers = new XElement("InstantMessengers");
-            foreach (InstantMenssenger im in InstantMessengers)
-            {
-                instantMessengers.Add(
-                    new XElement("InstantMessenger",
-                    new XAttribute("Name", im.Name),
-                    new XAttribute("Type", im.Type))
-                );
-            }
-
-            // Creating XML Entry for the new contact
-            doc = new XElement(new XElement("DBContact", new XAttribute("Id", Id),
-                                new XElement("DisplayName",DisplayName),
-                                phones, emails, addresses, InstantMessengers,
-                                new XElement("PhotoURI",PhotoURI),
-                                new XElement("Organization", new XElement("Company",Organization.Company), new XElement("Title", Organization.Title)),
-                                new XElement("Notes",Notes)));
-           
-
-            Console.WriteLine(doc.ToString());
-            return doc;
-        }*/
     }
 
 #endregion contact

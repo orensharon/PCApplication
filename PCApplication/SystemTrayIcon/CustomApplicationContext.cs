@@ -122,17 +122,17 @@ namespace SystemTrayIcon.PCApplication
 
         // attach to context menu items
         private void showGalleryItem_Click(object sender, EventArgs e)     { 
-            //ShowGalleryForm();    
+            ShowGalleryForm();    
 
             // When the form loads, open this web page.
             try
             {
                 // Open the gallery html
-                System.Diagnostics.Process.Start(STORAGE_MAIM_PATH + "lib\\PhotoGallery\\index.html");
+                //System.Diagnostics.Process.Start(STORAGE_MAIM_PATH + "lib\\PhotoGallery\\index.html");
             }
             catch
             {
-                MessageBox.Show("Oops...:(\nSomething went wrong...", "File loading error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show("Oops...:(\nSomething went wrong...", "File loading error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         
         }
@@ -148,7 +148,7 @@ namespace SystemTrayIcon.PCApplication
             settingsForm = null; 
             Program._SettingDialogInstance = null; 
         }
-        private void galleryForm_Closed(object sender, EventArgs e) { galleryForm.webBrowser1.Dispose(); galleryForm = null; }
+        private void galleryForm_Closed(object sender, EventArgs e) { galleryForm = null; }
 
         # endregion the child forms
 

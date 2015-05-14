@@ -57,7 +57,14 @@ namespace IPSyncing
 
             // Start the background worker
             if (_worker.IsBusy == false)
-                _worker.RunWorkerAsync();
+                try
+                {
+                    _worker.RunWorkerAsync();
+                }
+                catch (Exception exception)
+                {
+                    _eventlog.WriteEntry(exception.GetType().ToString() + ": " + exception.Message);
+                }
 
         }
 
@@ -79,7 +86,7 @@ namespace IPSyncing
                     e.Cancel = true;
                     break;
                 }
-
+                
                 retrivedIP = null;
 
                 // Create a new instance of a pipe client - to communicate between windows server and application
@@ -125,6 +132,7 @@ namespace IPSyncing
                 try
                 {
                     // Send IP address to the PC application using pipes
+
                     pipclient.Send(retrivedIP, PIPE_NAME);
                 }
 
