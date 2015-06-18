@@ -66,7 +66,7 @@ namespace DataStreaming
         [WebInvoke(Method = "POST",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
-            BodyStyle = WebMessageBodyStyle.Bare,
+            BodyStyle = WebMessageBodyStyle.Wrapped,
             UriTemplate = "/Contact/Get")]
         List<ContactRequest> GetContacts();
 
@@ -85,10 +85,16 @@ namespace DataStreaming
         public string Id { get; set; }
 
         [DataMember]
-        public long DateCreated { get; set; }
+        public string DateCreated { get; set; }
 
         [DataMember]
-        public long LastModified { get; set; }
+        public string LastModified { get; set; }
+
+        [DataMember]
+        public string OnwerPhysicalAddress { get; set; }
+
+        [DataMember]
+        public string GeoLocation { get; set; }
 
     }
 
@@ -125,12 +131,6 @@ namespace DataStreaming
 
     }
 
-    public class InstantMenssenger
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-
-    }
 
     [DataContract]
     public class ContactRequest
@@ -145,7 +145,7 @@ namespace DataStreaming
         public List<Email> Emails { get; set; }
 
         [DataMember]
-        public string PhotoURI { get; set; }
+        public string PhotoId { get; set; }
 
         [DataMember]
         public List<LivingAddress> Addresses { get; set; }
@@ -163,7 +163,13 @@ namespace DataStreaming
         public string TypeOfContent { get; set; }
 
         [DataMember]
-        public List<InstantMenssenger> InstantMessengers { get; set; }
+        public string PhysicalAddress { get; set; }
+
+        [DataMember]
+        public string CreatedTimeStamp { get; set; }
+
+        [DataMember]
+        public string ModifiedTimeStamp { get; set; }
 
     }
 

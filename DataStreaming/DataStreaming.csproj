@@ -81,7 +81,7 @@
     <Compile Include="db\StoredContentBL.cs" />
     <Compile Include="db\StoredContentDAL.cs" />
     <Compile Include="IStreamService.cs" />
-    <Compile Include="utils\Helper.cs" />
+    <Compile Include="utils\ImageUtilities.cs" />
     <Compile Include="utils\JWTManager.cs" />
     <Compile Include="multipart-parser\BinaryStreamStack.cs" />
     <Compile Include="multipart-parser\FilePart.cs" />
@@ -93,6 +93,7 @@
     <Compile Include="multipart-parser\SubsequenceFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamService.cs" />
+    <Compile Include="utils\LocationResolver.cs" />
     <Compile Include="utils\MD5Checksum.cs" />
   </ItemGroup>
   <ItemGroup>

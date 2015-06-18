@@ -17,8 +17,13 @@ namespace PCApplication
 
         public static void WriteToSystemStatusLog(int s)
         {
-            //_SystemStatusLogLabel.Text = Constants.SYSTEM_STATUS[s];
-            System.IO.File.AppendAllText(Application.StartupPath + "\\log.txt", "\n" + Constants.SYSTEM_STATUS[s] );
+            //_SystemLogTextbox.Text = Constants.SYSTEM_STATUS[s];
+            System.IO.File.AppendAllText(Application.StartupPath + "\\log.txt", "\r\n" + Constants.SYSTEM_STATUS[s]);
+        }
+
+        public static void WriteToSystemStatusLog(String s)
+        {
+            System.IO.File.AppendAllText(Application.StartupPath + "\\log.txt", "\r\n" + s);
         }
 
         public static string GetSystemStatusLog()
@@ -29,7 +34,7 @@ namespace PCApplication
 
             for (int i = lines.Length - 1; i >= 0; i--)
             {
-                log += lines[i] + "\n";
+                log += lines[i] + "\r\n";
             }
 
             return log;

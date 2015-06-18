@@ -35,7 +35,7 @@ namespace PCApplication
 
         // Connection tab
         private TextBox _IPTextBox;
-        public Label _SystemStatusLogLabel;
+        public TextBox _SystemLogTextbox;
 
         public SettingsForm()
         {
@@ -70,7 +70,7 @@ namespace PCApplication
 
             // Connection tab
             _IPTextBox = GeneralTabContainer_ConnectionGroupBox_IPTextBox;
-            _SystemStatusLogLabel = ConnectionTabContainer_StatusGroupBox_lblStatusValue;
+            _SystemLogTextbox = LogsTabContainer_StatusGroupBox_txtSystemLog;
             
             //_Streamer = new ServiceHost(typeof(DataStreaming.StreamService));
             
@@ -79,6 +79,7 @@ namespace PCApplication
         private void cmdOK_Click(object sender, EventArgs e)
         {
             // TODO: apply settings to hide window
+            Close();
         }
 
         private void LogoutAttempt()
@@ -103,6 +104,10 @@ namespace PCApplication
             {
                 // Show error message
                 MessageBox.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                SystemStatusLog.WriteToSystemStatusLog(Constants.STATUS_KEY_LOGIN_ERROR + " [" + message + "]");
             }
             UpdateUI();
         }
@@ -253,7 +258,7 @@ namespace PCApplication
                 }
 
                 
-                _SystemStatusLogLabel.Text = SystemStatusLog.GetSystemStatusLog();
+                _SystemLogTextbox.Text = SystemStatusLog.GetSystemStatusLog();
             });
         }
 

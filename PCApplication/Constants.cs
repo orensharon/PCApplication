@@ -20,9 +20,15 @@ namespace PCApplication
         public static int STATUS_KEY_LOGGED_OUT = 2;
         public static int STATUS_KEY_SERVER_RUNNING = 3;
         public static int STATUS_KEY_SYNCING_IP = 4;
+        public static int STATUS_KEY_LOGIN_ERROR = 5;
 
         // System Status Log String constants
-        public static string[] SYSTEM_STATUS = { "Logging-in...", "Logged-in to system", "Logged-out", "Server is running", "Syncing IP..." };
+        public static string[] SYSTEM_STATUS = { "Logging-in...", 
+                                                   "Logged-in to system", 
+                                                   "Logged-out", 
+                                                   "Server is running", 
+                                                   "Syncing IP...",
+                                                   "Login error"};
 
 
         // Login Error message keys

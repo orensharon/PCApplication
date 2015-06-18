@@ -26,8 +26,7 @@ namespace PCApplication
            
             SystemSession systemSession = new SystemSession();
 
-            //int userID = 0;
-
+            // Creating the login request
             request = new UserLoginServiceReference.LoginRequest();
             request.Username = systemSession.getUserName();
             request.Password = systemSession.getPassword();
@@ -114,9 +113,6 @@ namespace PCApplication
                 // Start the IP syncing service
                 StartIPSyncService(systemSession.getUserToken());
 
-                // Start the hosting server service
-                //StartServer();
-
                 // Update status log
                 SystemStatusLog.WriteToSystemStatusLog(Constants.STATUS_KEY_LOGGED);
             }
@@ -197,6 +193,7 @@ namespace PCApplication
             // The caller will keep this pointer and will send it to the StopServer(streamer) method
 
             ServiceHost streamer = new ServiceHost(typeof(DataStreaming.StreamService));
+
 
             SystemSession systemSession = new SystemSession();
 
