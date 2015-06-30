@@ -1,4 +1,4 @@
-PCApplication
+Safe desktop application
 =============
 
 Desktop application that represents user's content's storage unit, the content from the Android device.
