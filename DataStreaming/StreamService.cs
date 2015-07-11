@@ -1,10 +1,10 @@
 ﻿
 using DatabaseLinker;
-using DataStreaming.db;
 using DataStreaming.utils;
 using HttpMultipartParser;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -172,17 +172,47 @@ namespace DataStreaming
 
                             try
                             {
+                                //Thread.Sleep(10000);
                                 db.SaveChanges();
                                 SetResponseHttpStatus(HttpStatusCode.Accepted);
                             }
-                            catch (Exception e)
+                            catch (DbUpdateConcurrencyException e)
                             {
-                                db.Dispose();
-                                SetResponseHttpStatus(HttpStatusCode.Conflict);
-                                return null;
+                                Console.WriteLine(e.Message);
+                                Console.WriteLine(e.InnerException);
                             }
+                            catch (DbUpdateException e)
+                            {
 
-                            // Save location coords and get location string from Google API
+                                Console.WriteLine(e.Message);
+                                Console.WriteLine(e.InnerException);
+                                if (e.InnerException != null && e.InnerException.InnerException != null)
+                                {
+                                    var innerException = e.InnerException.InnerException
+                                                           as System.Data.SqlClient.SqlException;
+                                    if (innerException != null &&
+                                           (
+                                               innerException.Number == 2627 ||
+                                               innerException.Number == 2601)
+                                           )
+                                    {
+                                        db.Dispose();
+                                        SetResponseHttpStatus(HttpStatusCode.MethodNotAllowed);
+                                        return null;
+                                    }
+                                    else
+                                    {
+                                        throw;
+                                    }
+                                }
+                                else
+                                {
+
+                                    db.Dispose();
+                                    SetResponseHttpStatus(HttpStatusCode.InternalServerError);
+                                    return null;
+                                }
+                            }                            // Save location coords and get location string from Google API
                         }
                     }
                 }
@@ -300,12 +330,42 @@ namespace DataStreaming
                             db.SaveChanges();
                             SetResponseHttpStatus(HttpStatusCode.Accepted);
                         }
-                        catch (Exception e)
+                        catch (DbUpdateConcurrencyException e)
                         {
-                            // Error saving
-                            db.Dispose();
-                            SetResponseHttpStatus(HttpStatusCode.Conflict);
-                            return null;
+                            Console.WriteLine(e.Message);
+                            Console.WriteLine(e.InnerException);
+                        }
+                        catch (DbUpdateException e)
+                        {
+
+                            Console.WriteLine(e.Message);
+                            Console.WriteLine(e.InnerException);
+                            if (e.InnerException != null && e.InnerException.InnerException != null)
+                            {
+                                var innerException = e.InnerException.InnerException
+                                                       as System.Data.SqlClient.SqlException;
+                                if (innerException != null &&
+                                       (
+                                           innerException.Number == 2627 ||
+                                           innerException.Number == 2601)
+                                       )
+                                {
+                                    db.Dispose();
+                                    SetResponseHttpStatus(HttpStatusCode.MethodNotAllowed);
+                                    return null;
+                                }
+                                else
+                                {
+                                    throw;
+                                }
+                            }
+                            else
+                            {
+
+                                db.Dispose();
+                                SetResponseHttpStatus(HttpStatusCode.InternalServerError);
+                                return null;
+                            }
                         }
                     }
                 }
@@ -397,10 +457,10 @@ namespace DataStreaming
                             {
                                 // Simple edit the exist organization
                                 organization.Company = request.Organization.Company;
-                                organization.Title = request.Organization.Title;   
+                                organization.Title = request.Organization.Title;
                             }
                         }
-                        
+
                         // Remove saved phones, emails and addresses
                         db.Phones.RemoveRange(contact.Phones);
                         db.Emails.RemoveRange(contact.Emails);
@@ -421,7 +481,12 @@ namespace DataStreaming
                             db.Dispose();
                             SetResponseHttpStatus(HttpStatusCode.Conflict);
                             return null;
-                        }                        
+                        }
+                    }
+                    else
+                    {
+                        // Means contact not realy exsit
+                        InsertContact(request);
                     }
                 }
 
@@ -464,10 +529,11 @@ namespace DataStreaming
                 {
                     result = photos.Select(response => new PhotoResponse()
                     {
-                        Id = response.Id.ToString(),
+                        Id = response.Id,
                         DateCreated = response.DataCreated,
                         LastModified = response.LastModified,
                         GeoLocation = response.GeoLocation,
+                        RealId = response.RemotePhotoId
                         //OnwerPhysicalAddress = response.Owner.PhysicalAddress
 
                     }).ToList();
@@ -546,9 +612,9 @@ namespace DataStreaming
             WebOperationContext.Current.OutgoingResponse.ContentLength = length;
             return stream;
         }
-        public List<ContactRequest> GetContacts() 
+        public List<ContactResponse> GetContacts() 
         {
-            List<ContactRequest> result;
+            List<ContactResponse> result;
 
 
             var authToken = WebOperationContext.Current.IncomingRequest.Headers["Authorization"];
@@ -564,7 +630,7 @@ namespace DataStreaming
             }
 
             // Get all ids of contatcs from data base
-            result = new List<ContactRequest>();
+            result = new List<ContactResponse>();
             using (ContentContext db = new ContentContext())
             {
                 var contacts = (from c
@@ -575,12 +641,12 @@ namespace DataStreaming
                 {
                     // Create request contact from entity contact
 
-                    ContactRequest item = new ContactRequest();
+                    ContactResponse item = new ContactResponse();
                     item.Id = contact.Id.ToString();
                     item.DisplayName = contact.DisplayName;
                     item.Notes = contact.Notes;
                     item.PhotoId = "todo";
-                    item.TypeOfContent = "Contact";
+                    //item.TypeOfContent = "Contact";
                     item.Phones = contact.Phones.Select(p => new Phone()
                     {
                             Number = p.Number ,
@@ -617,12 +683,12 @@ namespace DataStreaming
 
 
         // Private functions
-
         private void SetResponseHttpStatus(HttpStatusCode statusCode)
         {
             var context = WebOperationContext.Current;
             context.OutgoingResponse.StatusCode = statusCode;
         }
+
         private Image FlipRotatePhoto(Image img)
         {
             // Rotate photo according the orientation
@@ -692,11 +758,8 @@ namespace DataStreaming
             return Ret;
         }
 
-       
-
-
         // Read geo coordinations from Exif
-        private static double? GetLatitude(Image targetImg)
+        private double? GetLatitude(Image targetImg)
         {
             try
             {
@@ -711,7 +774,7 @@ namespace DataStreaming
                 return null;
             }
         }
-        private static double? GetLongitude(Image targetImg)
+        private double? GetLongitude(Image targetImg)
         {
             try
             {
@@ -726,7 +789,7 @@ namespace DataStreaming
                 return null;
             }
         }
-        private static double ExifGpsToDouble(PropertyItem propItemRef, PropertyItem propItem)
+        private double ExifGpsToDouble(PropertyItem propItemRef, PropertyItem propItem)
         {
             double degreesNumerator = BitConverter.ToUInt32(propItem.Value, 0);
             double degreesDenominator = BitConverter.ToUInt32(propItem.Value, 4);

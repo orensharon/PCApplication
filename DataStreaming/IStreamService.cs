@@ -68,7 +68,7 @@ namespace DataStreaming
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Wrapped,
             UriTemplate = "/Contact/Get")]
-        List<ContactRequest> GetContacts();
+        List<ContactResponse> GetContacts();
 
         #endregion upload content
        
@@ -82,7 +82,10 @@ namespace DataStreaming
     public class PhotoResponse
     {
         [DataMember]
-        public string Id { get; set; }
+        public int Id { get; set; }
+
+        [DataMember]
+        public int RealId { get; set; }
 
         [DataMember]
         public string DateCreated { get; set; }
@@ -171,8 +174,36 @@ namespace DataStreaming
         [DataMember]
         public string ModifiedTimeStamp { get; set; }
 
+
     }
 
+    [DataContract]
+    public class ContactResponse
+    {
+        [DataMember]
+        public string Notes { get; set; }
+
+        [DataMember]
+        public List<Phone> Phones { get; set; }
+
+        [DataMember]
+        public List<Email> Emails { get; set; }
+
+        [DataMember]
+        public string PhotoId { get; set; }
+
+        [DataMember]
+        public List<LivingAddress> Addresses { get; set; }
+
+        [DataMember]
+        public string Id { get; set; }
+
+        [DataMember]
+        public Organization Organization { get; set; }
+
+        [DataMember]
+        public string DisplayName { get; set; }
+    }
 #endregion contact
 
 

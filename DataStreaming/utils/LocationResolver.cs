@@ -28,7 +28,7 @@ namespace DataStreaming.utils
 
             try
             {
-                doc.Load("http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + latitude + "," + longitude + "&key=" + API_KEY);
+                doc.Load("https://maps.googleapis.com/maps/api/geocode/xml?latlng=" + latitude + "," + longitude + "&key=" + API_KEY);
                 XmlNode element = doc.SelectSingleNode("//GeocodeResponse/status");
 
                 if (!element.InnerText.Equals("ZERO_RESULTS"))
@@ -43,46 +43,39 @@ namespace DataStreaming.utils
                     XmlNodeList xnList = doc.SelectNodes("//GeocodeResponse/result/address_component");
                     foreach (XmlNode xn in xnList)
                     {
-                        try
+                        
+                        longname = xn["long_name"].InnerText;
+                        shortname = xn["short_name"].InnerText;
+                        typename = xn["type"].InnerText;
+
+                        switch (typename)
                         {
-                            longname = xn["long_name"].InnerText;
-                            shortname = xn["short_name"].InnerText;
-                            typename = xn["type"].InnerText;
-
-                            switch (typename)
-                            {
-                                //Add whatever you are looking for below
-                                case "country":
-                                    {
-                                        Address_country = longname;
-                                        break;
-                                    }
-
-                                case "route":
-                                    {
-                                        Address_street = longname;
-                                        break;
-                                    }
-
-                                case "locality":
-                                    {
-                                        Address_city = longname;
-                                        break;
-                                    }
-
-                                default:
+                            //Add whatever you are looking for below
+                            case "country":
+                                {
+                                    Address_country = longname;
                                     break;
-                            }
+                                }
+
+                            case "route":
+                                {
+                                    Address_street = longname;
+                                    break;
+                                }
+
+                            case "locality":
+                                {
+                                    Address_city = longname;
+                                    break;
+                                }
+
+                            default:
+                                break;
                         }
-
-                        catch (Exception e)
-                        {}
-
-
                     }
                 }
-
             }
+
             catch (Exception ex)
             { }
 
